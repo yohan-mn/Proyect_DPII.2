@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -21,6 +22,17 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyect.travelhub.data.model.User
 import com.proyect.travelhub.data.model.UserRole
+
+// ---------------------------------------------------------------------------
+// Misma paleta usada en LoginScreen (inspirada en el Lago Titicaca) para
+// mantener consistencia visual entre pantallas. No afecta ninguna lógica.
+// ---------------------------------------------------------------------------
+private val TiticacaDeepBlue = Color(0xFF0D3B66)
+private val TiticacaBlue = Color(0xFF1976D2)
+private val TiticacaTurquoise = Color(0xFF14B8A6)
+private val TiticacaSky = Color(0xFFE3F2FD)
+private val SurfaceSoft = Color(0xFFFFFFFF)
+private val TextMuted = Color(0xFF5B6B79)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,14 +56,47 @@ fun RegisterScreen(
         }
     }
 
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = TiticacaTurquoise,
+        unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
+        focusedLabelColor = TiticacaTurquoise,
+        unfocusedLabelColor = TextMuted,
+        focusedLeadingIconColor = TiticacaTurquoise,
+        unfocusedLeadingIconColor = TextMuted,
+        focusedTrailingIconColor = TiticacaTurquoise,
+        unfocusedTrailingIconColor = TextMuted,
+        focusedTextColor = TiticacaDeepBlue,
+        unfocusedTextColor = TiticacaDeepBlue,
+
+        focusedPlaceholderColor = TextMuted,
+        unfocusedPlaceholderColor = TextMuted,
+
+        cursorColor = TiticacaTurquoise
+    )
+
+    val chipColors = FilterChipDefaults.filterChipColors(
+        selectedContainerColor = TiticacaTurquoise.copy(alpha = 0.15f),
+        selectedLabelColor = TiticacaDeepBlue,
+        labelColor = TextMuted
+    )
+
+    val chipBorder = FilterChipDefaults.filterChipBorder(
+        enabled = true,
+        selected = false,
+        borderColor = TiticacaBlue.copy(alpha = 0.25f),
+        selectedBorderColor = TiticacaTurquoise,
+        selectedBorderWidth = 1.5.dp
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.colorScheme.background
+                        TiticacaDeepBlue,
+                        TiticacaBlue,
+                        TiticacaSky
                     )
                 )
             )
@@ -67,47 +112,61 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.primary,
-                shadowElevation = 6.dp,
-                modifier = Modifier.size(70.dp)
+                shape = RoundedCornerShape(22.dp),
+                color = Color.Transparent,
+                modifier = Modifier
+                    .size(76.dp)
+                    .shadow(elevation = 14.dp, shape = RoundedCornerShape(22.dp), clip = false)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(TiticacaTurquoise, TiticacaBlue)
+                        ),
+                        shape = RoundedCornerShape(22.dp)
+                    )
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.PersonAdd,
                         contentDescription = "Registro",
                         tint = Color.White,
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(42.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Text(
                 text = "Registro en TravelHub",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.3.sp
+                ),
+                color = Color.White
             )
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = "Crea tu cuenta como Turista o Prestador de Servicios",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                color = Color.White.copy(alpha = 0.85f)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 12.dp, shape = RoundedCornerShape(28.dp), clip = false),
+                shape = RoundedCornerShape(28.dp),
+                colors = CardDefaults.cardColors(containerColor = SurfaceSoft),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
+                        .padding(horizontal = 22.dp, vertical = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     OutlinedTextField(
@@ -115,7 +174,8 @@ fun RegisterScreen(
                         onValueChange = { name = it },
                         label = { Text("Nombre Completo") },
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = fieldColors,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -127,7 +187,8 @@ fun RegisterScreen(
                         onValueChange = { email = it },
                         label = { Text("Correo Electrónico") },
                         leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = fieldColors,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -148,7 +209,8 @@ fun RegisterScreen(
                             }
                         },
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = fieldColors,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -160,52 +222,65 @@ fun RegisterScreen(
                         onValueChange = { phone = it },
                         label = { Text("Teléfono de Contacto") },
                         leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = fieldColors,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
 
-                    Spacer(modifier = Modifier.height(18.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     // Selección de Rol
                     Text(
                         text = "Tipo de Cuenta (Rol):",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = TiticacaDeepBlue,
                         modifier = Modifier.align(Alignment.Start)
                     )
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         FilterChip(
                             selected = selectedRole == UserRole.TURISTA,
                             onClick = { selectedRole = UserRole.TURISTA },
-                            label = { Text("🎒 Turista") },
+                            label = { Text("🧳 Turista", fontWeight = FontWeight.SemiBold) },
+                            shape = RoundedCornerShape(14.dp),
+                            colors = chipColors,
+                            border = chipBorder,
                             modifier = Modifier.weight(1f)
                         )
 
                         FilterChip(
                             selected = selectedRole == UserRole.PRESTADOR,
                             onClick = { selectedRole = UserRole.PRESTADOR },
-                            label = { Text("🏨 Prestador") },
+                            label = { Text("🛎️ Prestador", fontWeight = FontWeight.SemiBold) },
+                            shape = RoundedCornerShape(14.dp),
+                            colors = chipColors,
+                            border = chipBorder,
                             modifier = Modifier.weight(1f)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(22.dp))
 
                     if (authState is AuthState.Loading) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = TiticacaTurquoise)
                     } else {
                         Button(
                             onClick = { viewModel.register(email, password, name, selectedRole, phone) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(50.dp),
-                            shape = RoundedCornerShape(14.dp)
+                                .height(52.dp)
+                                .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp), clip = false),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = TiticacaBlue,
+                                contentColor = Color.White
+                            )
                         ) {
                             Text("Crear Cuenta", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
@@ -213,20 +288,33 @@ fun RegisterScreen(
 
                     if (authState is AuthState.Error) {
                         Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = (authState as AuthState.Error).message,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        Surface(
+                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.08f),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = (authState as AuthState.Error).message,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(10.dp)
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             TextButton(onClick = onNavigateToLogin) {
-                Text("¿Ya tienes una cuenta? Inicia sesión aquí")
+                Text(
+                    "¿Ya tienes una cuenta? Inicia sesión aquí",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }

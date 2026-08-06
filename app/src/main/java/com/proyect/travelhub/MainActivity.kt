@@ -24,6 +24,8 @@ import com.proyect.travelhub.ui.screens.profile.ProfileScreen
 import com.proyect.travelhub.ui.screens.provider.ProviderDashboardScreen
 import com.proyect.travelhub.ui.theme.TravelHubTheme
 
+import com.proyect.travelhub.ui.screens.servicedetail.ServiceDetailScreen
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,6 +106,37 @@ fun TravelHubAppNavigation() {
                 },
                 onNavigateToChatList = {
                     navController.navigate(NavRoutes.ChatList.route)
+                }
+            )
+        }
+
+        composable(
+            route = NavRoutes.ServiceDetail.route,
+            arguments = listOf(
+                androidx.navigation.navArgument("serviceId") {
+                    type = androidx.navigation.NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+
+            val serviceId =
+                backStackEntry.arguments?.getString("serviceId") ?: ""
+
+            ServiceDetailScreen(
+                serviceId = serviceId,
+                onBack = {
+                    navController.popBackStack()
+                },
+                onChatClick = { chatId, providerId, providerName ->
+
+                    navController.navigate(
+                        NavRoutes.Chat.createRoute(
+                            chatId = chatId,
+                            otherUserId = providerId,
+                            otherUserName = providerName
+                        )
+                    )
+
                 }
             )
         }

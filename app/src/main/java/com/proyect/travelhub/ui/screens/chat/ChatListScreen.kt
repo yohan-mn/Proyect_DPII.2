@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyect.travelhub.data.model.ChatConversation
 import java.text.SimpleDateFormat
 import java.util.*
+
+// ---------------------------------------------------------------------------
+// Misma paleta usada en Login/RegisterScreen/CatalogScreen (inspirada en el
+// Lago Titicaca) para mantener consistencia visual entre pantallas.
+// No afecta la l�gica.
+// ---------------------------------------------------------------------------
+private val TiticacaDeepBlue = Color(0xFF0D3B66)
+private val TiticacaBlue = Color(0xFF1976D2)
+private val TiticacaTurquoise = Color(0xFF14B8A6)
+private val TiticacaSky = Color(0xFFEAF4FB)
+private val TiticacaGold = Color(0xFFF2A93B)
+private val SurfaceSoft = Color(0xFFFFFFFF)
+private val TextMuted = Color(0xFF5B6B79)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,16 +49,19 @@ fun ChatListScreen(
     }
 
     Scaffold(
+        containerColor = TiticacaSky,
         topBar = {
             TopAppBar(
-                title = { Text("Mis Mensajes / Chat") },
+                title = { Text("Mis Mensajes / Chat", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = TiticacaDeepBlue,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }
@@ -61,18 +78,19 @@ fun ChatListScreen(
                         imageVector = Icons.Default.ChatBubble,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                        tint = TiticacaTurquoise.copy(alpha = 0.5f)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Aún no tienes conversaciones activas.",
-                        style = MaterialTheme.typography.titleMedium
+                        text = "A�n no tienes conversaciones activas.",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = TiticacaDeepBlue
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Contacta a un prestador desde el catálogo para chatear.",
+                        text = "Contacta a un prestador desde el cat�logo para chatear.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = TextMuted
                     )
                 }
             }
@@ -80,7 +98,9 @@ fun ChatListScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
+                    .padding(padding),
+                contentPadding = PaddingValues(vertical = 8.dp, horizontal = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(conversations) { item ->
                     ConversationItemRow(
@@ -89,7 +109,6 @@ fun ChatListScreen(
                             onConversationClick(item.chatId, item.otherUserId, item.otherUserName)
                         }
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                 }
             }
         }
@@ -101,58 +120,67 @@ fun ConversationItemRow(
     item: ChatConversation,
     onClick: () -> Unit
 ) {
-    Row(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .shadow(elevation = 3.dp, shape = RoundedCornerShape(16.dp), clip = false)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        color = SurfaceSoft
     ) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(48.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                Text(
-                    text = item.otherUserName.take(1).uppercase().ifBlank { "U" },
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            Surface(
+                shape = CircleShape,
+                color = TiticacaTurquoise,
+                modifier = Modifier.size(48.dp)
             ) {
-                Text(
-                    text = item.otherUserName.ifBlank { "Usuario TravelHub" },
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                )
-                if (item.lastTimestamp > 0) {
-                    val date = Date(item.lastTimestamp)
-                    val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+                Box(contentAlignment = Alignment.Center) {
                     Text(
-                        text = format.format(date),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
+                        text = item.otherUserName.take(1).uppercase().ifBlank { "U" },
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
-            Text(
-                text = item.lastMessage.ifBlank { "Sin mensajes aún" },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = item.otherUserName.ifBlank { "Usuario TravelHub" },
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = TiticacaDeepBlue
+                    )
+                    if (item.lastTimestamp > 0) {
+                        val date = Date(item.lastTimestamp)
+                        val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+                        Text(
+                            text = format.format(date),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TiticacaGold
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = item.lastMessage.ifBlank { "Sin mensajes a�n" },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextMuted,
+                    maxLines = 1
+                )
+            }
         }
     }
 }

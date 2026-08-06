@@ -1,6 +1,5 @@
 package com.proyect.travelhub.ui.screens.chat
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,12 +11,25 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyect.travelhub.data.model.ChatMessage
+
+// ---------------------------------------------------------------------------
+// Misma paleta usada en Login/RegisterScreen/CatalogScreen (inspirada en el
+// Lago Titicaca) para mantener consistencia visual entre pantallas.
+// No afecta la l�gica.
+// ---------------------------------------------------------------------------
+private val TiticacaDeepBlue = Color(0xFF0D3B66)
+private val TiticacaBlue = Color(0xFF1976D2)
+private val TiticacaTurquoise = Color(0xFF14B8A6)
+private val TiticacaSky = Color(0xFFEAF4FB)
+private val TiticacaGold = Color(0xFFF2A93B)
+private val SurfaceSoft = Color(0xFFFFFFFF)
+private val TextMuted = Color(0xFF5B6B79)
+private val BubbleReceived = Color(0xFFEAF4FB)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,13 +48,14 @@ fun ChatScreen(
     }
 
     Scaffold(
+        containerColor = TiticacaSky,
         topBar = {
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(
                             shape = androidx.compose.foundation.shape.CircleShape,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = TiticacaTurquoise,
                             modifier = Modifier.size(36.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -55,18 +68,28 @@ fun ChatScreen(
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
-                            Text(otherUserName, style = MaterialTheme.typography.titleMedium)
-                            Text("En línea", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                            Text(
+                                otherUserName,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = Color.White
+                            )
+                            Text(
+                                "En l�nea",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = TiticacaGold
+                            )
                         }
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = TiticacaDeepBlue,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }
@@ -90,7 +113,8 @@ fun ChatScreen(
             }
 
             Surface(
-                tonalElevation = 3.dp,
+                color = SurfaceSoft,
+                shadowElevation = 4.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -102,10 +126,15 @@ fun ChatScreen(
                     OutlinedTextField(
                         value = textInput,
                         onValueChange = { textInput = it },
-                        placeholder = { Text("Escribe un mensaje...") },
+                        placeholder = { Text("Escribe un mensaje...", color = TextMuted) },
                         shape = RoundedCornerShape(24.dp),
                         modifier = Modifier.weight(1f),
-                        maxLines = 3
+                        maxLines = 3,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = TiticacaTurquoise,
+                            unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
+                            cursorColor = TiticacaDeepBlue
+                        )
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -117,7 +146,7 @@ fun ChatScreen(
                                 textInput = ""
                             }
                         },
-                        containerColor = MaterialTheme.colorScheme.primary,
+                        containerColor = TiticacaTurquoise,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(Icons.Default.Send, contentDescription = "Enviar", tint = Color.White)
@@ -141,7 +170,7 @@ fun ChatBubble(msg: ChatMessage, isMe: Boolean) {
                 bottomStart = if (isMe) 16.dp else 4.dp,
                 bottomEnd = if (isMe) 4.dp else 16.dp
             ),
-            color = if (isMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+            color = if (isMe) TiticacaBlue else BubbleReceived,
             shadowElevation = 2.dp,
             modifier = Modifier.widthIn(max = 280.dp)
         ) {
@@ -151,13 +180,13 @@ fun ChatBubble(msg: ChatMessage, isMe: Boolean) {
                         text = msg.senderName,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = TiticacaDeepBlue
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                 }
                 Text(
                     text = msg.messageText,
-                    color = if (isMe) Color.White else MaterialTheme.colorScheme.onSecondaryContainer,
+                    color = if (isMe) Color.White else TiticacaDeepBlue,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

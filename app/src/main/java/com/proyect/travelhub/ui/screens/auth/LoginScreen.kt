@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.launch
@@ -23,6 +24,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyect.travelhub.data.model.User
+
+// ---------------------------------------------------------------------------
+// Paleta inspirada en el Lago Titicaca: azules profundos, turquesas y un
+// acento cálido dorado (totora / atardecer andino) para los botones.
+// Solo se usa para dar un aspecto propio; no altera ninguna lógica.
+// ---------------------------------------------------------------------------
+private val TiticacaDeepBlue = Color(0xFF0D3B66)
+private val TiticacaBlue = Color(0xFF1976D2)
+private val TiticacaTurquoise = Color(0xFF14B8A6)
+private val TiticacaSky = Color(0xFFE3F2FD)
+private val TiticacaGold = Color(0xFFF2A93B)
+private val TiticacaGoldDark = Color(0xFFD98324)
+private val SurfaceSoft = Color(0xFFFFFFFF)
+private val TextMuted = Color(0xFF5B6B79)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,14 +63,37 @@ fun LoginScreen(
         }
     }
 
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+
+        focusedTextColor = Color.Black,
+        unfocusedTextColor = Color.Black,
+
+        focusedPlaceholderColor = TextMuted,
+        unfocusedPlaceholderColor = TextMuted,
+
+        focusedLabelColor = TiticacaTurquoise,
+        unfocusedLabelColor = TextMuted,
+
+        focusedBorderColor = TiticacaTurquoise,
+        unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
+
+        focusedLeadingIconColor = TiticacaTurquoise,
+        unfocusedLeadingIconColor = TextMuted,
+        focusedTrailingIconColor = TiticacaTurquoise,
+        unfocusedTrailingIconColor = TextMuted,
+
+        cursorColor = TiticacaTurquoise
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.colorScheme.background
+                        TiticacaDeepBlue,
+                        TiticacaBlue,
+                        TiticacaSky
                     )
                 )
             )
@@ -73,65 +111,82 @@ fun LoginScreen(
             // Logo Icon Container
             Surface(
                 shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.primary,
-                shadowElevation = 8.dp,
-                modifier = Modifier.size(80.dp)
+                color = Color.Transparent,
+                modifier = Modifier
+                    .size(88.dp)
+                    .shadow(elevation = 16.dp, shape = RoundedCornerShape(24.dp), clip = false)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(TiticacaTurquoise, TiticacaBlue)
+                        ),
+                        shape = RoundedCornerShape(24.dp)
+                    )
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.TravelExplore,
                         contentDescription = "Logo",
                         tint = Color.White,
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(50.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             Text(
                 text = "TravelHub",
                 style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 34.sp
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 36.sp,
+                    letterSpacing = 0.5.sp
                 ),
-                color = MaterialTheme.colorScheme.primary
+                color = Color.White
             )
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = "Explora el Lago Titicaca y gestiona tus viajes",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                color = Color.White.copy(alpha = 0.85f)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             // Card Form Container
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(elevation = 12.dp, shape = RoundedCornerShape(28.dp), clip = false),
+                shape = RoundedCornerShape(28.dp),
+                colors = CardDefaults.cardColors(containerColor = SurfaceSoft),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
+                        .padding(horizontal = 22.dp, vertical = 26.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = "Iniciar Sesión",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        ),
+                        color = TiticacaDeepBlue
                     )
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(22.dp))
 
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Correo Electrónico") },
                         leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = fieldColors,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -152,7 +207,8 @@ fun LoginScreen(
                             }
                         },
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = fieldColors,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -163,21 +219,31 @@ fun LoginScreen(
                             resetEmailInput = email
                             showForgotDialog = true
                         }) {
-                            Text("¿Olvidaste tu contraseña?", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                "¿Olvidaste tu contraseña?",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TiticacaBlue,
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     if (authState is AuthState.Loading) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = TiticacaTurquoise)
                     } else {
                         Button(
                             onClick = { viewModel.login(email, password) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(50.dp),
-                            shape = RoundedCornerShape(14.dp)
+                                .height(52.dp)
+                                .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp), clip = false),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = TiticacaBlue,
+                                contentColor = Color.White
+                            )
                         ) {
                             Text("Iniciar Sesión", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
@@ -185,18 +251,25 @@ fun LoginScreen(
 
                     if (authState is AuthState.Error) {
                         Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = (authState as AuthState.Error).message,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        Surface(
+                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.08f),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = (authState as AuthState.Error).message,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(10.dp)
+                            )
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                    HorizontalDivider()
+                    HorizontalDivider(color = TextMuted.copy(alpha = 0.2f))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     // Botón Continuar con Google
                     val activity = context as? android.app.Activity
@@ -237,25 +310,33 @@ fun LoginScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(14.dp)
+                            .height(52.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, TiticacaBlue.copy(alpha = 0.35f)),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TiticacaDeepBlue)
                     ) {
                         Icon(
                             imageVector = Icons.Default.AccountCircle,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = TiticacaBlue
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Continuar con Google (Gmail)")
+                        Text("Continuar con Google (Gmail)", fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             TextButton(onClick = onNavigateToRegister) {
-                Text("¿No tienes cuenta? Crear una cuenta gratis", fontWeight = FontWeight.Bold)
+                Text(
+                    "¿No tienes cuenta? Crear una cuenta gratis",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 
@@ -263,15 +344,52 @@ fun LoginScreen(
     if (showForgotDialog) {
         AlertDialog(
             onDismissRequest = { showForgotDialog = false },
-            title = { Text("Recuperar Contraseña") },
+            containerColor = SurfaceSoft,
+            shape = RoundedCornerShape(24.dp),
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.LockReset,
+                    contentDescription = null,
+                    tint = TiticacaTurquoise
+                )
+            },
+            title = {
+                Text(
+                    "Recuperar Contraseña",
+                    fontWeight = FontWeight.Bold,
+                    color = TiticacaDeepBlue
+                )
+            },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Ingresa tu correo registrado y te enviaremos una clave/enlace para restablecer tu contraseña.")
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        "Ingresa tu correo registrado y te enviaremos una clave/enlace para restablecer tu contraseña.",
+                        color = TextMuted,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                     OutlinedTextField(
                         value = resetEmailInput,
                         onValueChange = { resetEmailInput = it },
                         label = { Text("Correo Electrónico") },
                         singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+
+                            focusedPlaceholderColor = TextMuted,
+                            unfocusedPlaceholderColor = TextMuted,
+
+                            focusedBorderColor = TiticacaTurquoise,
+                            unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
+
+                            focusedLabelColor = TiticacaTurquoise,
+                            unfocusedLabelColor = TextMuted,
+
+                            cursorColor = TiticacaTurquoise
+                        ),
+
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -288,13 +406,21 @@ fun LoginScreen(
                             }
                         }
                     },
-                    enabled = !isResetLoading
+                    enabled = !isResetLoading,
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = TiticacaGold,
+                        contentColor = Color.White,
+                        disabledContainerColor = TiticacaGold.copy(alpha = 0.5f)
+                    )
                 ) {
                     Text(if (isResetLoading) "Enviando..." else "Enviar Correo")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showForgotDialog = false }) { Text("Cancelar") }
+                TextButton(onClick = { showForgotDialog = false }) {
+                    Text("Cancelar", color = TextMuted)
+                }
             }
         )
     }

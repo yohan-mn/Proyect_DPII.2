@@ -43,4 +43,17 @@ class ServiceRepository(
             emptyList()
         }
     }
+
+    suspend fun getServiceById(serviceId: String): ServiceItem? {
+        return try {
+            val snapshot = servicesCollection
+                .document(serviceId)
+                .get()
+                .await()
+
+            snapshot.toObject(ServiceItem::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

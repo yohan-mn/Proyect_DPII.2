@@ -9,6 +9,7 @@ import com.proyect.travelhub.data.repository.ItineraryRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.proyect.travelhub.data.repository.ReservationRepository
 
 data class CategoryCostBreakdown(
     val category: ServiceCategory,
@@ -31,22 +32,66 @@ class CostCalculatorViewModel(
     val isLoading: StateFlow<Boolean> = _isLoading
 
     init {
+
         calculateCosts()
+
+        viewModelScope.launch {
+
+            ReservationRepository.reservations.collect {
+
+                calculateCosts()
+
+            }
+
+        }
+
     }
 
     fun calculateCosts() {
         val uid = authRepository.currentUserId ?: return
         viewModelScope.launch {
             _isLoading.value = true
-            val items = itineraryRepository.getTouristItinerary(uid)
-            val sum = items.sumOf { it.cost }
+            val itineraryItems = itineraryRepository.getTouristItinerary(uid)
+
+            val reservationItems =
+                ReservationRepository.reservations.value
+
+            val itineraryTotal =
+                itineraryItems.sumOf { it.cost }
+
+            val reservationTotal =
+                reservationItems.sumOf { it.pricePerDayOrUnit }
+
+            val sum =
+                itineraryTotal + reservationTotal
             _totalCost.value = sum
 
-            val grouped = items.groupBy { it.category }
+            val itineraryGrouped =
+                itineraryItems.groupBy { it.category }
             val breakdown = ServiceCategory.values().map { cat ->
-                val catSum = grouped[cat]?.sumOf { it.cost } ?: 0.0
-                val pct = if (sum > 0) (catSum / sum).toFloat() else 0f
-                CategoryCostBreakdown(cat, catSum, pct)
+
+                val itineraryCost =
+                    itineraryGrouped[cat]?.sumOf { it.cost } ?: 0.0
+
+                val reservationCost =
+                    reservationItems
+                        .filter { it.category == cat }
+                        .sumOf { it.pricePerDayOrUnit }
+
+                val categoryTotal =
+                    itineraryCost + reservationCost
+
+                val pct =
+                    if (sum > 0)
+                        (categoryTotal / sum).toFloat()
+                    else
+                        0f
+
+                CategoryCostBreakdown(
+                    cat,
+                    categoryTotal,
+                    pct
+                )
             }
             _breakdownList.value = breakdown
             _isLoading.value = false
