@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "394449632962",
+    "project_id": "travelhub-8cc17",
+    "storage_bucket": "travelhub-8cc17.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:394449632962:android:3f0dd5a9bdda0aac9d055b",
+        "android_client_info": {
+          "package_name": "com.proyect.travelhub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "394449632962-k5r020o10hm5lbom7kesq8vlpfj4g16c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.proyect.travelhub",
+            "certificate_hash": "1a27a8785a676e483d149aeec0734c101e0fe731"
+          }
+        },
+        {
+          "client_id": "394449632962-ivan1unoedoeip9k2cgnuus1ne7fsntn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2Nt5kW7VvZT-dJrQWrR8z-i7xxRQIVzo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "394449632962-ivan1unoedoeip9k2cgnuus1ne7fsntn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
