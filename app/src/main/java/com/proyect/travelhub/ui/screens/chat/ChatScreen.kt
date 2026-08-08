@@ -75,7 +75,7 @@ fun ChatScreen(
                                 color = TextPrimary
                             )
                             Text(
-                                "En l?nea",
+                                "En línea",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = PrimaryOrange
                             )
@@ -135,7 +135,9 @@ fun ChatScreen(
                             unfocusedContainerColor = InputBg,
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
-                            cursorColor = PrimaryOrange
+                            cursorColor = PrimaryOrange,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary
                         )
                     )
 

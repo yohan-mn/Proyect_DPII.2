@@ -23,7 +23,7 @@ import com.proyect.travelhub.data.model.User
 import com.proyect.travelhub.data.model.UserRole
 
 // ---------------------------------------------------------------------------
-// Paleta adaptada desde las referencias visuales (salón/barbería Casca)
+// Paleta adaptada desde las referencias visuales (salon/barberia Casca)
 // ---------------------------------------------------------------------------
 private val PrimaryOrange      = Color(0xFFF5A623)
 private val PrimaryOrangeDark  = Color(0xFFE8941F)
@@ -60,6 +60,7 @@ fun RegisterScreen(
     val fieldColors = TextFieldDefaults.colors(
         focusedTextColor = TextPrimary,
         unfocusedTextColor = TextPrimary,
+        disabledTextColor = TextPrimary,
         focusedContainerColor = InputBg,
         unfocusedContainerColor = InputBg,
         disabledContainerColor = InputBg,
@@ -73,6 +74,9 @@ fun RegisterScreen(
         unfocusedTrailingIconColor = TextSecondary,
         cursorColor = PrimaryOrange
     )
+
+    // Se refuerza el color del texto escrito (independiente del tema de la app)
+    val fieldTextStyle = LocalTextStyle.current.copy(color = TextPrimary)
 
     val chipColors = FilterChipDefaults.filterChipColors(
         containerColor = InputBg,
@@ -164,6 +168,7 @@ fun RegisterScreen(
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                         shape = RoundedCornerShape(16.dp),
                         colors = fieldColors,
+                        textStyle = fieldTextStyle,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -177,6 +182,7 @@ fun RegisterScreen(
                         leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                         shape = RoundedCornerShape(16.dp),
                         colors = fieldColors,
+                        textStyle = fieldTextStyle,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -186,7 +192,7 @@ fun RegisterScreen(
                     TextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("Contraseña (mínimo 6 caracteres)") },
+                        label = { Text("Contraseña (minimo 6 caracteres)") },
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -200,6 +206,7 @@ fun RegisterScreen(
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         shape = RoundedCornerShape(16.dp),
                         colors = fieldColors,
+                        textStyle = fieldTextStyle,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -213,13 +220,14 @@ fun RegisterScreen(
                         leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
                         shape = RoundedCornerShape(16.dp),
                         colors = fieldColors,
+                        textStyle = fieldTextStyle,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Selección de Rol (MISMA LÓGICA, ESTILO ADAPTADO)
+                    // Seleccion de Rol
                     Text(
                         text = "Tipo de Cuenta (Rol):",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
@@ -236,7 +244,8 @@ fun RegisterScreen(
                         FilterChip(
                             selected = selectedRole == UserRole.TURISTA,
                             onClick = { selectedRole = UserRole.TURISTA },
-                            label = { Text("🧳 Turista", fontWeight = FontWeight.SemiBold) },
+                            label = { Text("Turista", fontWeight = FontWeight.SemiBold) },
+                            leadingIcon = { Icon(Icons.Default.Hiking, contentDescription = null) },
                             shape = RoundedCornerShape(14.dp),
                             colors = chipColors,
                             border = chipBorder,
@@ -246,7 +255,8 @@ fun RegisterScreen(
                         FilterChip(
                             selected = selectedRole == UserRole.PRESTADOR,
                             onClick = { selectedRole = UserRole.PRESTADOR },
-                            label = { Text("🏪 Prestador", fontWeight = FontWeight.SemiBold) },
+                            label = { Text("Prestador", fontWeight = FontWeight.SemiBold) },
+                            leadingIcon = { Icon(Icons.Default.Storefront, contentDescription = null) },
                             shape = RoundedCornerShape(14.dp),
                             colors = chipColors,
                             border = chipBorder,

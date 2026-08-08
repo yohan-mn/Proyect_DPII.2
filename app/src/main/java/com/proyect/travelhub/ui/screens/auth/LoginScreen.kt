@@ -84,6 +84,7 @@ fun LoginScreen(
     val fieldColors = TextFieldDefaults.colors(
         focusedTextColor = TextPrimary,
         unfocusedTextColor = TextPrimary,
+        disabledTextColor = TextPrimary,
         focusedContainerColor = InputBg,
         unfocusedContainerColor = InputBg,
         disabledContainerColor = InputBg,
@@ -113,7 +114,7 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Logo Icon Container (misma estructura, estilo naranja)
+            // Logo Icon Container
             Surface(
                 shape = RoundedCornerShape(24.dp),
                 color = Color.Transparent,
@@ -148,7 +149,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Card Form Container (misma estructura original)
+            // Card Form Container
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -314,7 +315,7 @@ fun LoginScreen(
         }
     }
 
-    // Diálogo Olvidaste tu contraseña (LÓGICA ORIGINAL INTACTA)
+    // Diálogo ¿Olvidaste tu contraseña?
     if (showForgotDialog) {
         AlertDialog(
             onDismissRequest = { showForgotDialog = false },
@@ -348,6 +349,8 @@ fun LoginScreen(
                         singleLine = true,
                         shape = RoundedCornerShape(14.dp),
                         colors = TextFieldDefaults.colors(
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
                             focusedContainerColor = InputBg,
                             unfocusedContainerColor = InputBg,
                             focusedIndicatorColor = Color.Transparent,

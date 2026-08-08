@@ -7,6 +7,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import com.proyect.travelhub.data.repository.AuthRepository
 
 class ChatRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -41,8 +42,27 @@ class ChatRepository(
             docRef.set(newMsg).await()
 
             // Actualizar resumen en lista de chats para ambos usuarios
-            val conversationSummary = mapOf(
+            // Obtener nombre real del receptor
+            val authRepository = AuthRepository()
+            val receiver = authRepository.getUserById(message.receiverId)
+            val receiverName = receiver?.name ?: "Usuario"
+
+// Resumen que verá el emisor
+            val senderSummary = mapOf(
                 "chatId" to chatId,
+                "otherUserId" to message.receiverId,
+                "otherUserName" to receiverName,
+                "otherUserPhoto" to "",
+                "lastMessage" to message.messageText,
+                "lastTimestamp" to message.timestamp
+            )
+
+// Resumen que verá el receptor
+            val receiverSummary = mapOf(
+                "chatId" to chatId,
+                "otherUserId" to message.senderId,
+                "otherUserName" to message.senderName,
+                "otherUserPhoto" to "",
                 "lastMessage" to message.messageText,
                 "lastTimestamp" to message.timestamp
             )
@@ -50,13 +70,11 @@ class ChatRepository(
             if (message.senderId.isNotBlank()) {
                 firestore.collection("users").document(message.senderId)
                     .collection("conversations").document(chatId)
-                    .set(conversationSummary, com.google.firebase.firestore.SetOptions.merge())
-            }
+                    .set(senderSummary, com.google.firebase.firestore.SetOptions.merge())            }
             if (message.receiverId.isNotBlank()) {
                 firestore.collection("users").document(message.receiverId)
                     .collection("conversations").document(chatId)
-                    .set(conversationSummary, com.google.firebase.firestore.SetOptions.merge())
-            }
+                    .set(receiverSummary, com.google.firebase.firestore.SetOptions.merge())            }
 
             Result.success(true)
         } catch (e: Exception) {

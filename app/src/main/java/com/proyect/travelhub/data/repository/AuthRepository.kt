@@ -77,6 +77,21 @@ class AuthRepository(
         }
     }
 
+    suspend fun getUserById(uid: String): User? {
+        if (uid.isBlank()) return null
+
+        return try {
+            val doc = firestore.collection("users")
+                .document(uid)
+                .get()
+                .await()
+
+            doc.toObject(User::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     suspend fun updateUserProfile(name: String, phone: String, avatarUrl: String): Result<Unit> {
         val uid = currentUserId ?: return Result.failure(Exception("No autenticado"))
         return try {
