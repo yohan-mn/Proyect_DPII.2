@@ -1,10 +1,12 @@
 package com.proyect.travelhub.ui.screens.catalog
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -15,25 +17,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.proyect.travelhub.data.model.ServiceCategory
 import com.proyect.travelhub.data.model.ServiceItem
 
 // ---------------------------------------------------------------------------
-// Misma paleta usada en Login/RegisterScreen (inspirada en el Lago Titicaca)
-// para mantener consistencia visual entre pantallas. No afecta la lógica.
+// Paleta inspirada en las referencias visuales (salón/barbería Casca)
 // ---------------------------------------------------------------------------
-private val TiticacaDeepBlue = Color(0xFF0D3B66)
-private val TiticacaBlue = Color(0xFF1976D2)
-private val TiticacaTurquoise = Color(0xFF14B8A6)
-private val TiticacaSky = Color(0xFFEAF4FB)
-private val TiticacaGold = Color(0xFFF2A93B)
-private val SurfaceSoft = Color(0xFFFFFFFF)
-private val TextMuted = Color(0xFF5B6B79)
+private val PrimaryOrange      = Color(0xFFF5A623)
+private val PrimaryOrangeLight = Color(0xFFFFF3E0)
+private val Background         = Color(0xFFE3F2FD)
+private val SurfaceSoft        = Color(0xFFFFFFFF)
+private val InputBg            = Color(0xFFF5F5F5)
+private val TextPrimary        = Color(0xFF1F1F1F)
+private val TextSecondary      = Color(0xFF9E9E9E)
+private val StarColor          = Color(0xFFFFB800)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,41 +54,24 @@ fun CatalogScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
 
-    val chipColors = FilterChipDefaults.filterChipColors(
-        containerColor = SurfaceSoft,
-        selectedContainerColor = TiticacaTurquoise.copy(alpha = 0.15f),
-        selectedLabelColor = TiticacaDeepBlue,
-        labelColor = TextMuted
-    )
-
-    val chipBorder = FilterChipDefaults.filterChipBorder(
-        enabled = true,
-        selected = false,
-        borderColor = TiticacaBlue.copy(alpha = 0.2f),
-        selectedBorderColor = TiticacaTurquoise,
-        selectedBorderWidth = 1.5.dp
-    )
-
     Scaffold(
-        containerColor = TiticacaSky,
+        containerColor = Background,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Catálogo de Servicios Turísticos",
+                        "Catálogo ",
                         fontWeight = FontWeight.Bold
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TiticacaDeepBlue,
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White
+                    containerColor = SurfaceSoft,
+                    titleContentColor = TextPrimary,
+                    actionIconContentColor = TextPrimary
                 ),
                 actions = {
-                    IconButton(onClick = onNavigateToChatList) {
-                        Icon(Icons.Default.Chat, contentDescription = "Mis Chats")
-                    }
                     IconButton(onClick = { viewModel.loadServices(selectedCategory) }) {
+
                         Icon(Icons.Default.Refresh, contentDescription = "Actualizar")
                     }
                     IconButton(onClick = onNavigateToProfile) {
@@ -96,14 +83,14 @@ fun CatalogScreen(
         bottomBar = {
             NavigationBar(
                 containerColor = SurfaceSoft,
-                contentColor = TiticacaDeepBlue
+                tonalElevation = 0.dp
             ) {
                 val navColors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = TiticacaTurquoise,
-                    selectedTextColor = TiticacaTurquoise,
-                    indicatorColor = TiticacaTurquoise.copy(alpha = 0.12f),
-                    unselectedIconColor = TextMuted,
-                    unselectedTextColor = TextMuted
+                    selectedIconColor = PrimaryOrange,
+                    selectedTextColor = PrimaryOrange,
+                    indicatorColor = PrimaryOrange.copy(alpha = 0.12f),
+                    unselectedIconColor = TextSecondary,
+                    unselectedTextColor = TextSecondary
                 )
                 NavigationBarItem(
                     selected = true,
@@ -141,45 +128,45 @@ fun CatalogScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Filtros de Categorías
+            // Categorías estilo referencia: iconos circulares seleccionables
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp)
             ) {
+                // Item "Todos"
                 item {
-                    FilterChip(
-                        selected = selectedCategory == null,
-                        onClick = { viewModel.loadServices(null) },
-                        label = { Text("✨ Todos", fontWeight = FontWeight.SemiBold) },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = chipColors,
-                        border = chipBorder
+                    CategoryCircleItem(
+                        icon = Icons.Default.Dashboard,
+                        label = "Todos",
+                        isSelected = selectedCategory == null,
+                        onClick = { viewModel.loadServices(null) }
                     )
                 }
                 items(ServiceCategory.values()) { category ->
-                    val label = when (category) {
-                        ServiceCategory.HOSPEDAJE -> "🏨 Hospedaje"
-                        ServiceCategory.ALIMENTACION -> "🍽️ Restaurantes"
-                        ServiceCategory.GUIA -> "🧭 Guías Turísticos"
-                        ServiceCategory.TRANSPORTE -> "🚌 Transporte"
-                        ServiceCategory.TRADUCCION -> "🗣️ Traducción"
+                    val (icon, label) = when (category) {
+                        ServiceCategory.HOSPEDAJE -> Icons.Default.Hotel to "Hospedaje"
+                        ServiceCategory.ALIMENTACION -> Icons.Default.Restaurant to "Comida"
+                        ServiceCategory.GUIA -> Icons.Default.Explore to "Guías"
+                        ServiceCategory.TRANSPORTE -> Icons.Default.DirectionsCar to "Transporte"
+                        ServiceCategory.TRADUCCION -> Icons.Default.Translate to "Traducción"
                     }
-                    FilterChip(
-                        selected = selectedCategory == category,
-                        onClick = { viewModel.loadServices(category) },
-                        label = { Text(label, fontWeight = FontWeight.SemiBold) },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = chipColors,
-                        border = chipBorder
+                    CategoryCircleItem(
+                        icon = icon,
+                        label = label,
+                        isSelected = selectedCategory == category,
+                        onClick = { viewModel.loadServices(category) }
                     )
                 }
             }
 
+            HorizontalDivider(color = TextSecondary.copy(alpha = 0.1f))
+
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = TiticacaTurquoise)
+                    CircularProgressIndicator(color = PrimaryOrange)
                 }
             } else if (services.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -187,13 +174,13 @@ fun CatalogScreen(
                         Icon(
                             Icons.Default.SearchOff,
                             contentDescription = null,
-                            tint = TextMuted.copy(alpha = 0.5f),
+                            tint = TextSecondary.copy(alpha = 0.5f),
                             modifier = Modifier.size(48.dp)
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
                             "No hay servicios disponibles en esta categoría.",
-                            color = TextMuted
+                            color = TextSecondary
                         )
                     }
                 }
@@ -201,10 +188,10 @@ fun CatalogScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     items(services) { service ->
-                        ServiceCard(
+                        ServiceCardRow(
                             service = service,
                             onClick = { onServiceClick(service.id) },
                             onChatClick = {
@@ -220,8 +207,57 @@ fun CatalogScreen(
     }
 }
 
+// ---------------------------------------------------------------------------
+// Categoría estilo referencia: círculo con icono + label debajo
+// ---------------------------------------------------------------------------
 @Composable
-fun ServiceCard(service: ServiceItem, onClick: () -> Unit, onChatClick: () -> Unit) {
+private fun CategoryCircleItem(
+    icon: ImageVector,
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .shadow(
+                    elevation = if (isSelected) 8.dp else 2.dp,
+                    shape = CircleShape,
+                    clip = false
+                )
+                .background(
+                    color = if (isSelected) PrimaryOrange else InputBg,
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = if (isSelected) Color.White else TextSecondary,
+                modifier = Modifier.size(26.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+            ),
+            color = if (isSelected) PrimaryOrange else TextSecondary
+        )
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tarjeta horizontal estilo referencia (Nearby Your Location)
+// ---------------------------------------------------------------------------
+@Composable
+fun ServiceCardRow(service: ServiceItem, onClick: () -> Unit, onChatClick: () -> Unit) {
     val photoUrl = if (service.imageUrls.isNotEmpty() && service.imageUrls.first().isNotBlank()) {
         service.imageUrls.first()
     } else {
@@ -237,102 +273,87 @@ fun ServiceCard(service: ServiceItem, onClick: () -> Unit, onChatClick: () -> Un
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(elevation = 6.dp, shape = RoundedCornerShape(20.dp), clip = false)
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp), clip = false)
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = SurfaceSoft),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column {
-            // Imagen del servicio
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Imagen cuadrada redondeada (estilo referencia)
             AsyncImage(
                 model = photoUrl,
                 contentDescription = service.title,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(170.dp)
-                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(16.dp)),
                 contentScale = ContentScale.Crop
             )
 
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = service.title,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = TiticacaDeepBlue,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Badge(containerColor = TiticacaTurquoise.copy(alpha = 0.15f)) {
-                        Text(
-                            text = service.category.name,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = TiticacaDeepBlue,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
+            Spacer(modifier = Modifier.width(14.dp))
 
-                Spacer(modifier = Modifier.height(6.dp))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = service.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextMuted,
-                    maxLines = 2
+                    text = service.title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = TextPrimary
                 )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Star,
-                            contentDescription = "Rating",
-                            tint = TiticacaGold,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "${service.rating} • ${service.location}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextMuted
-                        )
-                    }
-                    Text(
-                        text = "S/ ${service.pricePerDayOrUnit}",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = TiticacaBlue
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                OutlinedButton(
-                    onClick = onChatClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, TiticacaBlue.copy(alpha = 0.35f)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TiticacaDeepBlue)
-                ) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = service.location,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary,
+                    maxLines = 1
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.Default.Chat,
+                        imageVector = Icons.Default.Star,
                         contentDescription = null,
-                        tint = TiticacaTurquoise,
-                        modifier = Modifier.size(18.dp)
+                        tint = StarColor,
+                        modifier = Modifier.size(16.dp)
                     )
-                    Spacer(Modifier.width(6.dp))
-                    Text("Chatear / Reservar con Prestador", fontWeight = FontWeight.SemiBold)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${service.rating}",
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "• ${service.category.name}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
+                    )
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "S/ ${service.pricePerDayOrUnit}",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = PrimaryOrange
+                )
+            }
+
+            // Botón de acción (chat) como icono circular naranja, estilo referencia
+            FilledIconButton(
+                onClick = onChatClick,
+                modifier = Modifier.size(44.dp),
+                shape = CircleShape,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = PrimaryOrangeLight,
+                    contentColor = PrimaryOrange
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Chat,
+                    contentDescription = "Chatear",
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }

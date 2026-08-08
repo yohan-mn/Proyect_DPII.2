@@ -16,8 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,16 +27,35 @@ import com.proyect.travelhub.data.model.ServiceCategory
 import com.proyect.travelhub.data.model.ServiceItem
 
 // ---------------------------------------------------------------------------
-// Paleta Lago Titicaca (coherente con LoginScreen)
+// Paleta inspirada en las referencias (salon/barberia Casca)
 // ---------------------------------------------------------------------------
-private val TiticacaDeepBlue = Color(0xFF0D3B66)
-private val TiticacaBlue   = Color(0xFF1976D2)
-private val TiticacaTurquoise = Color(0xFF14B8A6)
-private val TiticacaSky    = Color(0xFFE3F2FD)
-private val TiticacaGold   = Color(0xFFF2A93B)
-private val TiticacaGoldDark = Color(0xFFD98324)
-private val SurfaceSoft    = Color(0xFFFFFFFF)
-private val TextMuted      = Color(0xFF5B6B79)
+private val PrimaryOrange      = Color(0xFFF5A623)
+private val PrimaryOrangeLight = Color(0xFFFFF3E0)
+private val PrimaryOrangeDark  = Color(0xFFE8941F)
+private val Background         = Color(0xFFE3F2FD)
+private val SurfaceSoft        = Color(0xFFFFFFFF)
+private val InputBg            = Color(0xFFF5F5F5)
+private val TextPrimary        = Color(0xFF1F1F1F)
+private val TextSecondary      = Color(0xFF9E9E9E)
+
+// ---------------------------------------------------------------------------
+// Iconos y etiquetas por categoria de servicio
+// ---------------------------------------------------------------------------
+private fun categoryIcon(category: ServiceCategory): ImageVector = when (category) {
+    ServiceCategory.HOSPEDAJE     -> Icons.Default.Hotel
+    ServiceCategory.ALIMENTACION  -> Icons.Default.Restaurant
+    ServiceCategory.GUIA          -> Icons.Default.TravelExplore
+    ServiceCategory.TRANSPORTE    -> Icons.Default.DirectionsCar
+    ServiceCategory.TRADUCCION    -> Icons.Default.Translate
+}
+
+private fun categoryLabel(category: ServiceCategory): String = when (category) {
+    ServiceCategory.HOSPEDAJE     -> "Hospedaje / Hotel"
+    ServiceCategory.ALIMENTACION  -> "Restaurante / Gastronomia"
+    ServiceCategory.GUIA          -> "Guia Turistico"
+    ServiceCategory.TRANSPORTE    -> "Transporte Privado / Tour"
+    ServiceCategory.TRADUCCION    -> "Servicio de Traduccion"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,22 +76,22 @@ fun ProviderDashboardScreen(
                 title = {
                     Text(
                         "Panel del Prestador",
-                        color = Color.White,
+                        color = TextPrimary,
                         fontWeight = FontWeight.Bold
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TiticacaDeepBlue
+                    containerColor = SurfaceSoft
                 ),
                 actions = {
                     IconButton(onClick = onNavigateToChatList) {
-                        Icon(Icons.Default.Chat, contentDescription = "Mis Chats", tint = Color.White)
+                        Icon(Icons.Default.Chat, contentDescription = "Mis Chats", tint = TextPrimary)
                     }
                     IconButton(onClick = { viewModel.loadMyServices() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Actualizar", tint = Color.White)
+                        Icon(Icons.Default.Refresh, contentDescription = "Actualizar", tint = TextPrimary)
                     }
                     IconButton(onClick = onNavigateToProfile) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "Mi Perfil", tint = Color.White)
+                        Icon(Icons.Default.AccountCircle, contentDescription = "Mi Perfil", tint = TextPrimary)
                     }
                 }
             )
@@ -80,40 +99,35 @@ fun ProviderDashboardScreen(
         bottomBar = {
             NavigationBar(
                 containerColor = SurfaceSoft,
-                tonalElevation = 2.dp
+                tonalElevation = 0.dp
             ) {
+                val navColors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = PrimaryOrange,
+                    selectedTextColor = PrimaryOrange,
+                    indicatorColor = PrimaryOrange.copy(alpha = 0.12f),
+                    unselectedIconColor = TextSecondary,
+                    unselectedTextColor = TextSecondary
+                )
                 NavigationBarItem(
                     selected = true,
                     onClick = { },
                     label = { Text("Mis Servicios") },
                     icon = { Icon(Icons.Default.Storefront, contentDescription = null) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = TiticacaTurquoise,
-                        selectedTextColor = TiticacaTurquoise,
-                        indicatorColor = TiticacaSky
-                    )
+                    colors = navColors
                 )
                 NavigationBarItem(
                     selected = false,
                     onClick = onNavigateToChatList,
                     label = { Text("Mensajes / Chat") },
                     icon = { Icon(Icons.Default.Chat, contentDescription = null) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = TiticacaTurquoise,
-                        selectedTextColor = TiticacaTurquoise,
-                        indicatorColor = TiticacaSky
-                    )
+                    colors = navColors
                 )
                 NavigationBarItem(
                     selected = false,
                     onClick = onNavigateToProfile,
                     label = { Text("Perfil") },
                     icon = { Icon(Icons.Default.Person, contentDescription = null) },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = TiticacaTurquoise,
-                        selectedTextColor = TiticacaTurquoise,
-                        indicatorColor = TiticacaSky
-                    )
+                    colors = navColors
                 )
             }
         },
@@ -122,103 +136,94 @@ fun ProviderDashboardScreen(
                 onClick = { showAddServiceDialog = true },
                 icon = { Icon(Icons.Default.Add, contentDescription = null) },
                 text = { Text("Publicar Servicio", fontWeight = FontWeight.SemiBold) },
-                containerColor = TiticacaGold,
+                containerColor = PrimaryOrange,
                 contentColor = Color.White,
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.shadow(8.dp, RoundedCornerShape(16.dp), clip = false)
             )
         }
     ) { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(TiticacaSky, Color.White)
-                    )
-                )
+                .background(Background)
+                .padding(padding)
+                .padding(horizontal = 16.dp)
         ) {
-            Column(
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Banner naranja estilo referencia
+            Card(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .shadow(6.dp, RoundedCornerShape(20.dp), clip = false),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = PrimaryOrange)
             ) {
-                // Header card
-                Card(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .shadow(6.dp, RoundedCornerShape(20.dp), clip = false),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = TiticacaDeepBlue
-                    )
+                        .padding(20.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp)
-                    ) {
-                        Text(
-                            text = "Tus Servicios Turísticos Publicados",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
+                    Text(
+                        text = "Tus Servicios Turisticos Publicados",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Gestiona y publica nuevos servicios para turistas del Lago Titicaca",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.9f)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = PrimaryOrange)
+                }
+            } else if (myServices.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Surface(
+                            shape = RoundedCornerShape(24.dp),
+                            color = PrimaryOrangeLight,
+                            modifier = Modifier.size(80.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.Store,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(40.dp),
+                                    tint = PrimaryOrange
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(16.dp))
                         Text(
-                            text = "Gestiona y publica nuevos servicios para turistas del Lago Titicaca",
+                            "Aun no has publicado servicios turisticos.",
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                            color = TextPrimary
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Toca en '+ Publicar Servicio' para agregar tu hotel, restaurante o tour.",
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.8f)
+                            color = TextSecondary
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (isLoading) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = TiticacaTurquoise)
-                    }
-                } else if (myServices.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Surface(
-                                shape = RoundedCornerShape(24.dp),
-                                color = TiticacaSky,
-                                modifier = Modifier.size(80.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        Icons.Default.Store,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(40.dp),
-                                        tint = TiticacaBlue
-                                    )
-                                }
-                            }
-                            Spacer(Modifier.height(16.dp))
-                            Text(
-                                "Aún no has publicado servicios turísticos.",
-                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                color = TiticacaDeepBlue
-                            )
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                "Toca en '+ Publicar Servicio' para agregar tu hotel, restaurante o tour.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = TextMuted
-                            )
-                        }
-                    }
-                } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(myServices) { service ->
-                            ProviderServiceCard(service = service)
-                        }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(myServices) { service ->
+                        ProviderServiceCard(service = service)
                     }
                 }
             }
@@ -247,8 +252,8 @@ fun ProviderServiceCard(service: ServiceItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(4.dp, RoundedCornerShape(16.dp), clip = false),
-        shape = RoundedCornerShape(16.dp),
+            .shadow(4.dp, RoundedCornerShape(20.dp), clip = false),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = SurfaceSoft),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -261,7 +266,7 @@ fun ProviderServiceCard(service: ServiceItem) {
                 contentDescription = service.title,
                 modifier = Modifier
                     .size(90.dp)
-                    .clip(RoundedCornerShape(12.dp)),
+                    .clip(RoundedCornerShape(16.dp)),
                 contentScale = ContentScale.Crop
             )
 
@@ -271,22 +276,33 @@ fun ProviderServiceCard(service: ServiceItem) {
                 Text(
                     text = service.title,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = TiticacaDeepBlue
+                    color = TextPrimary
                 )
 
                 Spacer(Modifier.height(6.dp))
 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = TiticacaSky
+                    color = PrimaryOrangeLight
                 ) {
-                    Text(
-                        service.category.name,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = TiticacaDeepBlue,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = categoryIcon(service.category),
+                            contentDescription = null,
+                            tint = PrimaryOrangeDark,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            categoryLabel(service.category),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = PrimaryOrangeDark,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
 
                 Spacer(Modifier.height(6.dp))
@@ -294,13 +310,13 @@ fun ProviderServiceCard(service: ServiceItem) {
                     service.description,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 2,
-                    color = TextMuted
+                    color = TextSecondary
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "S/ ${service.pricePerDayOrUnit} / día • ${service.location}",
+                    text = "S/ ${service.pricePerDayOrUnit} / dia \u2022 ${service.location}",
                     style = MaterialTheme.typography.labelLarge,
-                    color = TiticacaTurquoise,
+                    color = PrimaryOrange,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -324,9 +340,7 @@ fun AddServiceDialog(
     val galleryLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         contract = androidx.activity.result.contract.ActivityResultContracts.GetContent()
     ) { uri: android.net.Uri? ->
-        uri?.let {
-            imageUrl = it.toString()
-        }
+        uri?.let { imageUrl = it.toString() }
     }
 
     AlertDialog(
@@ -335,9 +349,9 @@ fun AddServiceDialog(
         shape = RoundedCornerShape(24.dp),
         title = {
             Text(
-                "Publicar Servicio Turístico",
+                "Publicar Servicio Turistico",
                 fontWeight = FontWeight.Bold,
-                color = TiticacaDeepBlue
+                color = TextPrimary
             )
         },
         text = {
@@ -346,19 +360,12 @@ fun AddServiceDialog(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    "Categoría del Servicio:",
-                    style = MaterialTheme.typography.labelLarge.copy(color = TiticacaDeepBlue)
+                    "Categoria del Servicio:",
+                    style = MaterialTheme.typography.labelLarge.copy(color = TextPrimary)
                 )
 
                 Column {
                     ServiceCategory.values().forEach { category ->
-                        val label = when (category) {
-                            ServiceCategory.HOSPEDAJE -> "🏨 Hospedaje / Hotel"
-                            ServiceCategory.ALIMENTACION -> "🍽️ Restaurante / Gastronomía"
-                            ServiceCategory.GUIA -> "🧭 Guía Turístico"
-                            ServiceCategory.TRANSPORTE -> "🚤 Transporte Privado / Tour"
-                            ServiceCategory.TRADUCCION -> "🗣️ Servicio de Traducción"
-                        }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -370,123 +377,106 @@ fun AddServiceDialog(
                                 selected = selectedCategory == category,
                                 onClick = { selectedCategory = category },
                                 colors = RadioButtonDefaults.colors(
-                                    selectedColor = TiticacaTurquoise,
-                                    unselectedColor = TextMuted
+                                    selectedColor = PrimaryOrange,
+                                    unselectedColor = TextSecondary
                                 )
                             )
-                            Text(label, style = MaterialTheme.typography.bodyMedium, color = TiticacaDeepBlue)
+                            Icon(
+                                imageVector = categoryIcon(category),
+                                contentDescription = null,
+                                tint = PrimaryOrange,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                categoryLabel(category),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextPrimary
+                            )
                         }
                     }
                 }
 
-                OutlinedTextField(
+                TextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Título / Nombre del Establecimiento") },
+                    label = { Text("Titulo / Nombre del Establecimiento") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-
-                        focusedBorderColor = TiticacaTurquoise,
-                        unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
-
-                        focusedLabelColor = TiticacaTurquoise,
-                        unfocusedLabelColor = TextMuted,
-
-                        focusedTextColor = TiticacaDeepBlue,
-                        unfocusedTextColor = TiticacaDeepBlue,
-
-                        focusedPlaceholderColor = TextMuted,
-                        unfocusedPlaceholderColor = TextMuted,
-
-                        cursorColor = TiticacaTurquoise
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = InputBg,
+                        unfocusedContainerColor = InputBg,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = PrimaryOrange
                     )
                 )
 
-                OutlinedTextField(
+                TextField(
                     value = desc,
                     onValueChange = { desc = it },
-                    label = { Text("Descripción de los servicios") },
+                    label = { Text("Descripcion de los servicios") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-
-                        focusedBorderColor = TiticacaTurquoise,
-                        unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
-
-                        focusedLabelColor = TiticacaTurquoise,
-                        unfocusedLabelColor = TextMuted,
-
-                        focusedTextColor = TiticacaDeepBlue,
-                        unfocusedTextColor = TiticacaDeepBlue,
-
-                        focusedPlaceholderColor = TextMuted,
-                        unfocusedPlaceholderColor = TextMuted,
-
-                        cursorColor = TiticacaTurquoise
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = InputBg,
+                        unfocusedContainerColor = InputBg,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = PrimaryOrange
                     )
                 )
 
-                OutlinedTextField(
+                TextField(
                     value = priceStr,
                     onValueChange = { priceStr = it },
                     label = { Text("Precio estimado (S/)") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-
-                        focusedBorderColor = TiticacaTurquoise,
-                        unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
-
-                        focusedLabelColor = TiticacaTurquoise,
-                        unfocusedLabelColor = TextMuted,
-
-                        focusedTextColor = TiticacaDeepBlue,
-                        unfocusedTextColor = TiticacaDeepBlue,
-
-                        focusedPlaceholderColor = TextMuted,
-                        unfocusedPlaceholderColor = TextMuted,
-
-                        cursorColor = TiticacaTurquoise
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = InputBg,
+                        unfocusedContainerColor = InputBg,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = PrimaryOrange
                     )
                 )
 
-                OutlinedTextField(
+                TextField(
                     value = location,
                     onValueChange = { location = it },
-                    label = { Text("Ubicación (ej: Puno Centro, Uros)") },
+                    label = { Text("Ubicacion (ej: Puno Centro, Uros)") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-
-                        focusedBorderColor = TiticacaTurquoise,
-                        unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
-
-                        focusedLabelColor = TiticacaTurquoise,
-                        unfocusedLabelColor = TextMuted,
-
-                        focusedTextColor = TiticacaDeepBlue,
-                        unfocusedTextColor = TiticacaDeepBlue,
-
-                        focusedPlaceholderColor = TextMuted,
-                        unfocusedPlaceholderColor = TextMuted,
-
-                        cursorColor = TiticacaTurquoise
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = InputBg,
+                        unfocusedContainerColor = InputBg,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = PrimaryOrange
                     )
                 )
 
                 Text(
-                    "Fotografía del Establecimiento/Lugar:",
-                    style = MaterialTheme.typography.labelLarge.copy(color = TiticacaDeepBlue)
+                    "Fotografia del Establecimiento/Lugar:",
+                    style = MaterialTheme.typography.labelLarge.copy(color = TextPrimary)
                 )
 
                 if (imageUrl.isNotBlank()) {
                     AsyncImage(
                         model = imageUrl,
-                        contentDescription = "Previsualización",
+                        contentDescription = "Previsualizacion",
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(140.dp)
@@ -500,37 +490,30 @@ fun AddServiceDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = TiticacaBlue,
+                        containerColor = PrimaryOrange,
                         contentColor = Color.White
                     )
                 ) {
                     Icon(Icons.Default.PhotoLibrary, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Seleccionar de Galería")
+                    Text("Seleccionar de Galeria")
                 }
 
-                OutlinedTextField(
+                TextField(
                     value = imageUrl,
                     onValueChange = { imageUrl = it },
                     label = { Text("O pega una URL de foto") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-
-                        focusedBorderColor = TiticacaTurquoise,
-                        unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
-
-                        focusedLabelColor = TiticacaTurquoise,
-                        unfocusedLabelColor = TextMuted,
-
-                        focusedTextColor = TiticacaDeepBlue,
-                        unfocusedTextColor = TiticacaDeepBlue,
-
-                        focusedPlaceholderColor = TextMuted,
-                        unfocusedPlaceholderColor = TextMuted,
-
-                        cursorColor = TiticacaTurquoise
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = InputBg,
+                        unfocusedContainerColor = InputBg,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = TextPrimary,
+                        unfocusedTextColor = TextPrimary,
+                        cursorColor = PrimaryOrange
                     )
                 )
             }
@@ -544,17 +527,17 @@ fun AddServiceDialog(
                 enabled = title.isNotBlank(),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = TiticacaGold,
+                    containerColor = PrimaryOrange,
                     contentColor = Color.White,
-                    disabledContainerColor = TiticacaGold.copy(alpha = 0.5f)
+                    disabledContainerColor = PrimaryOrange.copy(alpha = 0.5f)
                 )
             ) {
-                Text("Publicar en Catálogo", fontWeight = FontWeight.Bold)
+                Text("Publicar en Catalogo", fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar", color = TextMuted)
+                Text("Cancelar", color = TextSecondary)
             }
         }
     )

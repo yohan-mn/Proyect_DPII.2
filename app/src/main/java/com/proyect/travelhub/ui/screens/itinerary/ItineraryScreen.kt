@@ -24,20 +24,20 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import com.proyect.travelhub.data.model.ItineraryItem
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.font.FontWeight
 
 // ---------------------------------------------------------------------------
-// Misma paleta usada en Login/RegisterScreen/CatalogScreen/Chat (inspirada en
-// el Lago Titicaca) para mantener consistencia visual entre pantallas.
-// No afecta la l�gica.
+// Paleta inspirada en las referencias (salón/barbería Casca)
 // ---------------------------------------------------------------------------
-private val TiticacaDeepBlue = Color(0xFF0D3B66)
-private val TiticacaBlue = Color(0xFF1976D2)
-private val TiticacaTurquoise = Color(0xFF14B8A6)
-private val TiticacaSky = Color(0xFFEAF4FB)
-private val TiticacaGold = Color(0xFFF2A93B)
-private val SurfaceSoft = Color(0xFFFFFFFF)
-private val TextMuted = Color(0xFF5B6B79)
-private val ErrorRed = Color(0xFFD64545)
+private val PrimaryOrange      = Color(0xFFF5A623)
+private val PrimaryOrangeLight = Color(0xFFFFF3E0)
+private val PrimaryOrangeDark  = Color(0xFFE8941F)
+private val Background         = Color(0xFFE3F2FD)
+private val SurfaceSoft        = Color(0xFFFFFFFF)
+private val InputBg            = Color(0xFFF5F5F5)
+private val TextPrimary        = Color(0xFF1F1F1F)
+private val TextSecondary      = Color(0xFF9E9E9E)
+private val ErrorRed           = Color(0xFFE53935)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,19 +61,17 @@ fun ItineraryScreen(
 
     val coroutineScope = rememberCoroutineScope()
     var showAddDialog by remember { mutableStateOf(false) }
-
-    // Estado para la tarjeta de previsualizaci�n al presionar un marcador
     var selectedPreviewItem by remember { mutableStateOf<ItineraryItem?>(null) }
 
     Scaffold(
-        containerColor = TiticacaSky,
+        containerColor = Background,
         topBar = {
             TopAppBar(
                 title = { Text("Mi Itinerario y Ruta", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TiticacaDeepBlue,
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White
+                    containerColor = SurfaceSoft,
+                    titleContentColor = TextPrimary,
+                    actionIconContentColor = TextPrimary
                 ),
                 actions = {
                     IconButton(
@@ -89,8 +87,8 @@ fun ItineraryScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.MyLocation,
-                            contentDescription = "Centrar en Mi Ubicaci�n",
-                            tint = TiticacaGold
+                            contentDescription = "Centrar en Mi Ubicaci?n",
+                            tint = PrimaryOrange
                         )
                     }
                     IconButton(onClick = onNavigateToProfile) {
@@ -102,16 +100,16 @@ fun ItineraryScreen(
         bottomBar = {
             NavigationBar(
                 containerColor = SurfaceSoft,
-                contentColor = TiticacaDeepBlue
+                tonalElevation = 0.dp
             ) {
                 val navColors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = TiticacaTurquoise,
-                    selectedTextColor = TiticacaTurquoise,
-                    indicatorColor = TiticacaTurquoise.copy(alpha = 0.12f),
-                    unselectedIconColor = TextMuted,
-                    unselectedTextColor = TextMuted
+                    selectedIconColor = PrimaryOrange,
+                    selectedTextColor = PrimaryOrange,
+                    indicatorColor = PrimaryOrange.copy(alpha = 0.12f),
+                    unselectedIconColor = TextSecondary,
+                    unselectedTextColor = TextSecondary
                 )
-                NavigationBarItem(selected = false, onClick = onNavigateToCatalog, label = { Text("Cat�logo") }, icon = { Icon(Icons.Default.Storefront, contentDescription = null) }, colors = navColors)
+                NavigationBarItem(selected = false, onClick = onNavigateToCatalog, label = { Text("Catalogo") }, icon = { Icon(Icons.Default.Storefront, contentDescription = null) }, colors = navColors)
                 NavigationBarItem(selected = true, onClick = { }, label = { Text("Itinerario") }, icon = { Icon(Icons.Default.Map, contentDescription = null) }, colors = navColors)
                 NavigationBarItem(selected = false, onClick = onNavigateToCalculator, label = { Text("Calculadora") }, icon = { Icon(Icons.Default.Calculate, contentDescription = null) }, colors = navColors)
                 NavigationBarItem(selected = false, onClick = onNavigateToChatList, label = { Text("Reservas / Chat") }, icon = { Icon(Icons.Default.Chat, contentDescription = null) }, colors = navColors)
@@ -120,8 +118,9 @@ fun ItineraryScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                containerColor = TiticacaTurquoise,
-                contentColor = Color.White
+                containerColor = PrimaryOrange,
+                contentColor = Color.White,
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Agregar lugar")
             }
@@ -132,8 +131,7 @@ fun ItineraryScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // ?? GOOGLE MAPS CON RUTA REAL Y FOTOS AL TOCAR MARCADORES
-            Box(modifier = Modifier.fillMaxWidth().height(290.dp)) {
+            Box(modifier = Modifier.fillMaxWidth().height(260.dp)) {
                 GoogleMap(
                     modifier = Modifier.fillMaxSize(),
                     cameraPositionState = cameraPositionState,
@@ -142,21 +140,19 @@ fun ItineraryScreen(
                         isMyLocationEnabled = userLocation != null
                     )
                 ) {
-                    // Marcador de la ubicaci�n del usuario si est� disponible
                     userLocation?.let { loc ->
                         Marker(
                             state = MarkerState(position = loc),
-                            title = "? Mi Ubicaci�n Actual",
+                            title = "? Mi Ubicacion Actual",
                             snippet = "Punto de inicio del recorrido"
                         )
                     }
 
-                    // Marcadores en cada destino
                     items.forEach { item ->
                         Marker(
                             state = MarkerState(position = LatLng(item.latitude, item.longitude)),
-                            title = "D�a ${item.dayNumber}: ${item.title}",
-                            snippet = "Toca para ver foto e informaci�n",
+                            title = "Dia ${item.dayNumber}: ${item.title}",
+                            snippet = "Toca para ver foto e informacion",
                             onClick = {
                                 selectedPreviewItem = item
                                 coroutineScope.launch {
@@ -169,17 +165,15 @@ fun ItineraryScreen(
                         )
                     }
 
-                    // Ruta vial en el mapa
                     if (routeResult.polylinePoints.size >= 2) {
                         Polyline(
                             points = routeResult.polylinePoints,
-                            color = TiticacaBlue,
+                            color = PrimaryOrangeDark,
                             width = 12f
                         )
                     }
                 }
 
-                // Banner superior de inicio desde ubicaci�n actual
                 userLocation?.let {
                     Surface(
                         modifier = Modifier
@@ -197,21 +191,20 @@ fun ItineraryScreen(
                                 checked = useCurrentLocStart,
                                 onCheckedChange = { viewModel.toggleUseCurrentLocation(it) },
                                 colors = CheckboxDefaults.colors(
-                                    checkedColor = TiticacaTurquoise,
-                                    uncheckedColor = TextMuted
+                                    checkedColor = PrimaryOrange,
+                                    uncheckedColor = TextSecondary
                                 )
                             )
                             Text(
-                                text = "Iniciar recorrido desde mi ubicaci�n actual",
+                                text = "Iniciar recorrido desde mi ubicacion actual",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = TiticacaDeepBlue
+                                color = TextPrimary
                             )
                         }
                     }
                 }
             }
 
-            // Card tiempo y distancia real
             if (routeResult.totalDurationText.isNotEmpty()) {
                 Card(
                     modifier = Modifier
@@ -228,40 +221,34 @@ fun ItineraryScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Timer, contentDescription = null,
-                                tint = TiticacaBlue)
+                            Icon(Icons.Default.Timer, contentDescription = null, tint = PrimaryOrange)
                             Spacer(Modifier.width(4.dp))
                             Column {
-                                Text("Tiempo de viaje", style = MaterialTheme.typography.labelSmall, color = TextMuted)
-                                Text(routeResult.totalDurationText,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = TiticacaBlue)
+                                Text("Tiempo de viaje", style = MaterialTheme.typography.labelSmall, color = TextSecondary)
+                                Text(routeResult.totalDurationText, style = MaterialTheme.typography.titleMedium, color = PrimaryOrangeDark)
                             }
                         }
-                        HorizontalDivider(modifier = Modifier.height(35.dp).width(1.dp), color = TiticacaBlue.copy(alpha = 0.2f))
+                        HorizontalDivider(modifier = Modifier.height(35.dp).width(1.dp), color = TextSecondary.copy(alpha = 0.2f))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Route, contentDescription = null,
-                                tint = TiticacaTurquoise)
+                            Icon(Icons.Default.Route, contentDescription = null, tint = PrimaryOrange)
                             Spacer(Modifier.width(4.dp))
                             Column {
-                                Text("Distancia total", style = MaterialTheme.typography.labelSmall, color = TextMuted)
-                                Text(routeResult.totalDistanceText,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = TiticacaTurquoise)
+                                Text("Distancia total", style = MaterialTheme.typography.labelSmall, color = TextSecondary)
+                                Text(routeResult.totalDistanceText, style = MaterialTheme.typography.titleMedium, color = PrimaryOrangeDark)
                             }
                         }
                     }
                 }
             }
 
-            Text("Itinerario D�a por D�a:",
+            Text("Itinerario Dia por Dia:",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                color = TiticacaDeepBlue,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp))
+                color = TextPrimary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
 
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = TiticacaTurquoise)
+                    CircularProgressIndicator(color = PrimaryOrange)
                 }
             } else if (items.isEmpty()) {
                 Box(
@@ -275,19 +262,19 @@ fun ItineraryScreen(
                             imageVector = Icons.Default.Map,
                             contentDescription = null,
                             modifier = Modifier.size(56.dp),
-                            tint = TiticacaTurquoise.copy(alpha = 0.6f)
+                            tint = PrimaryOrange.copy(alpha = 0.6f)
                         )
                         Spacer(Modifier.height(12.dp))
                         Text(
-                            text = "A�n no tienes destinos en tu itinerario",
+                            text = "Aun no tienes destinos en tu itinerario",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                            color = TiticacaDeepBlue
+                            color = TextPrimary
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = "Presiona el bot�n '+' para buscar y agregar tus destinos.",
+                            text = "Presiona el boton '+' para buscar y agregar tus destinos.",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = TextMuted
+                            color = TextSecondary
                         )
                     }
                 }
@@ -295,7 +282,7 @@ fun ItineraryScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(items) { item ->
                         ItineraryCard(
@@ -316,7 +303,6 @@ fun ItineraryScreen(
         }
     }
 
-    // ?? Tarjeta flotante de Vista Previa con Foto de Referencia (estilo Google Maps) ??
     selectedPreviewItem?.let { previewItem ->
         PlacePreviewDialog(
             item = previewItem,
@@ -339,9 +325,6 @@ fun ItineraryScreen(
     }
 }
 
-// ?????????????????????????????????????????????
-// Di�logo de Previsualizaci�n con Foto
-// ?????????????????????????????????????????????
 @Composable
 fun PlacePreviewDialog(
     item: ItineraryItem,
@@ -352,14 +335,16 @@ fun PlacePreviewDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = SurfaceSoft,
+        shape = RoundedCornerShape(24.dp),
         confirmButton = {
             Button(
                 onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = TiticacaTurquoise)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange)
             ) { Text("Entendido") }
         },
         title = {
-            Text(text = "D�a ${item.dayNumber}: ${item.title}", style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = TiticacaDeepBlue)
+            Text(text = "D?a ${item.dayNumber}: ${item.title}", style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = TextPrimary)
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -372,36 +357,30 @@ fun PlacePreviewDialog(
                         .clip(RoundedCornerShape(14.dp)),
                     contentScale = ContentScale.Crop
                 )
-
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = TiticacaBlue)
+                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = PrimaryOrange)
                     Spacer(Modifier.width(4.dp))
-                    Text(item.locationName, style = MaterialTheme.typography.titleSmall, color = TiticacaBlue)
+                    Text(item.locationName, style = MaterialTheme.typography.titleSmall, color = PrimaryOrangeDark)
                 }
-
-                Text(item.description, style = MaterialTheme.typography.bodyMedium, color = TextMuted)
-
+                Text(item.description, style = MaterialTheme.typography.bodyMedium, color = TextSecondary)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Costo estimado:", style = MaterialTheme.typography.labelLarge, color = TiticacaDeepBlue)
-                    Text("S/ ${item.cost}", style = MaterialTheme.typography.titleSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = TiticacaTurquoise)
+                    Text("Costo estimado:", style = MaterialTheme.typography.labelLarge, color = TextPrimary)
+                    Text("S/ ${item.cost}", style = MaterialTheme.typography.titleSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = PrimaryOrange)
                 }
             }
         }
     )
 }
 
-// ?????????????????????????????????????????????
-// Generador de Fotos de Referencia Tur�sticas
-// ?????????????????????????????????????????????
 fun getPlaceReferencePhoto(locationName: String, title: String): String {
     val text = "$locationName $title".lowercase()
     return when {
         text.contains("uros") -> "https://images.unsplash.com/photo-1589308078059-be1415eab4c3?w=800"
         text.contains("taquile") -> "https://images.unsplash.com/photo-1526392060635-9d6019884377?w=800"
-        text.contains("amantani") || text.contains("amantan�") -> "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800"
+        text.contains("amantani") || text.contains("amantan?") -> "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800"
         text.contains("sillustani") -> "https://images.unsplash.com/photo-1589308078059-be1415eab4c3?w=800"
         text.contains("chucuito") || text.contains("inka uyo") -> "https://images.unsplash.com/photo-1531968455001-5c5272a41129?w=800"
         text.contains("aramu") || text.contains("muru") -> "https://images.unsplash.com/photo-1518638150340-f706e86654de?w=800"
@@ -411,9 +390,6 @@ fun getPlaceReferencePhoto(locationName: String, title: String): String {
     }
 }
 
-// ?????????????????????????????????????????????
-// Di�logo con buscador + destinos populares
-// ?????????????????????????????????????????????
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPlaceDialog(
@@ -433,7 +409,7 @@ fun AddPlaceDialog(
     val popularPlaces = listOf(
         Triple("Islas Uros", -15.8239, -69.9691),
         Triple("Isla Taquile", -15.7725, -69.6881),
-        Triple("Isla Amantan�", -15.6667, -69.7083),
+        Triple("Isla Amantan", -15.6667, -69.7083),
         Triple("Chullpas de Sillustani", -15.7196, -70.1264),
         Triple("Chucuito - Inka Uyo", -15.8942, -69.8894),
         Triple("Portal Aramu Muru", -16.0378, -69.4189),
@@ -442,58 +418,50 @@ fun AddPlaceDialog(
     )
     var selectedPopular by remember { mutableStateOf<Triple<String, Double, Double>?>(null) }
 
-    val canSave = (selectedTab == 0 && selectedPlace != null) ||
-            (selectedTab == 1 && selectedPopular != null)
+    val canSave = (selectedTab == 0 && selectedPlace != null) || (selectedTab == 1 && selectedPopular != null)
 
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = SurfaceSoft,
-        title = { Text("Agregar Destino Tur�stico", color = TiticacaDeepBlue, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
+        shape = RoundedCornerShape(24.dp),
+        title = { Text("Agregar Destino Tur?stico", color = TextPrimary, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-
                 TabRow(
                     selectedTabIndex = selectedTab,
                     containerColor = Color.Transparent,
-                    contentColor = TiticacaTurquoise
+                    contentColor = PrimaryOrange
                 ) {
                     Tab(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0; selectedPopular = null },
                         text = { Text("Buscar lugar") },
-                        icon = { Icon(Icons.Default.Search, contentDescription = null,
-                            modifier = Modifier.size(16.dp)) }
+                        icon = { Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(16.dp)) }
                     )
                     Tab(
                         selected = selectedTab == 1,
-                        onClick = {
-                            selectedTab = 1
-                            viewModel.clearSelectedPlace()
-                            searchQuery = ""
-                        },
+                        onClick = { selectedTab = 1; viewModel.clearSelectedPlace(); searchQuery = "" },
                         text = { Text("Populares") },
-                        icon = { Icon(Icons.Default.Star, contentDescription = null,
-                            modifier = Modifier.size(16.dp)) }
+                        icon = { Icon(Icons.Default.Star, contentDescription = null, modifier = Modifier.size(16.dp)) }
                     )
                 }
 
                 if (selectedTab == 0) {
-                    OutlinedTextField(
+                    TextField(
                         value = searchQuery,
-                        onValueChange = {
-                            searchQuery = it
-                            viewModel.onSearchQueryChanged(it)
-                        },
+                        onValueChange = { searchQuery = it; viewModel.onSearchQueryChanged(it) },
                         label = { Text("Escribe el nombre del lugar") },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = TiticacaBlue) },
-                        trailingIcon = {
-                            if (isSearching) CircularProgressIndicator(modifier = Modifier.size(20.dp), color = TiticacaTurquoise)
-                        },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = PrimaryOrange) },
+                        trailingIcon = { if (isSearching) CircularProgressIndicator(modifier = Modifier.size(20.dp), color = PrimaryOrange) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = TiticacaTurquoise,
-                            unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f)
+                        shape = RoundedCornerShape(14.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = InputBg,
+                            unfocusedContainerColor = InputBg,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = PrimaryOrange
                         )
                     )
 
@@ -501,30 +469,23 @@ fun AddPlaceDialog(
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = TiticacaSky)
+                            colors = CardDefaults.cardColors(containerColor = InputBg)
                         ) {
                             Column {
                                 suggestions.take(5).forEach { suggestion ->
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clickable {
-                                                searchQuery = suggestion.description
-                                                viewModel.onSuggestionSelected(suggestion)
-                                            }
+                                            .clickable { searchQuery = suggestion.description; viewModel.onSuggestionSelected(suggestion) }
                                             .padding(horizontal = 16.dp, vertical = 10.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Icon(Icons.Default.LocationOn, contentDescription = null,
-                                            tint = TiticacaBlue,
-                                            modifier = Modifier.size(18.dp))
+                                        Icon(Icons.Default.LocationOn, contentDescription = null, tint = PrimaryOrange, modifier = Modifier.size(18.dp))
                                         Spacer(Modifier.width(8.dp))
-                                        Text(suggestion.description,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = TiticacaDeepBlue)
+                                        Text(suggestion.description, style = MaterialTheme.typography.bodyMedium, color = TextPrimary)
                                     }
                                     if (suggestion != suggestions.take(5).last()) {
-                                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = TiticacaBlue.copy(alpha = 0.15f))
+                                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = TextSecondary.copy(alpha = 0.15f))
                                     }
                                 }
                             }
@@ -535,90 +496,73 @@ fun AddPlaceDialog(
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = TiticacaTurquoise.copy(alpha = 0.12f))
+                            colors = CardDefaults.cardColors(containerColor = PrimaryOrangeLight)
                         ) {
-                            Row(modifier = Modifier.padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.CheckCircle, contentDescription = null,
-                                    tint = TiticacaTurquoise)
+                            Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = PrimaryOrange)
                                 Spacer(Modifier.width(8.dp))
                                 Column {
-                                    Text("? Lugar reconocido:",
-                                        style = MaterialTheme.typography.labelSmall, color = TextMuted)
-                                    Text(selectedPlace!!.name,
-                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                                        color = TiticacaDeepBlue)
+                                    Text("? Lugar reconocido:", style = MaterialTheme.typography.labelSmall, color = TextSecondary)
+                                    Text(selectedPlace!!.name, style = MaterialTheme.typography.titleSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = TextPrimary)
                                 }
                             }
                         }
                     }
 
-                    if (searchQuery.length >= 2 && !isSearching &&
-                        suggestions.isEmpty() && selectedPlace == null) {
-                        Text(
-                            "?? Sin resultados. Verifica tu conexi�n o prueba 'Populares'.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = ErrorRed
-                        )
+                    if (searchQuery.length >= 2 && !isSearching && suggestions.isEmpty() && selectedPlace == null) {
+                        Text("?? Sin resultados. Verifica tu conexi?n o prueba 'Populares'.", style = MaterialTheme.typography.bodySmall, color = ErrorRed)
                     }
                 }
 
                 if (selectedTab == 1) {
-                    Text("Selecciona un destino:",
-                        style = MaterialTheme.typography.labelLarge, color = TiticacaDeepBlue)
+                    Text("Selecciona un destino:", style = MaterialTheme.typography.labelLarge, color = TextPrimary)
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         popularPlaces.forEach { place ->
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { selectedPopular = place }
-                                    .padding(vertical = 4.dp),
+                                modifier = Modifier.fillMaxWidth().clickable { selectedPopular = place }.padding(vertical = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 RadioButton(
                                     selected = selectedPopular == place,
                                     onClick = { selectedPopular = place },
-                                    colors = RadioButtonDefaults.colors(
-                                        selectedColor = TiticacaTurquoise,
-                                        unselectedColor = TextMuted
-                                    )
+                                    colors = RadioButtonDefaults.colors(selectedColor = PrimaryOrange, unselectedColor = TextSecondary)
                                 )
-                                Icon(Icons.Default.LocationOn, contentDescription = null,
-                                    tint = if (selectedPopular == place)
-                                        TiticacaTurquoise
-                                    else TextMuted,
-                                    modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.LocationOn, contentDescription = null, tint = if (selectedPopular == place) PrimaryOrange else TextSecondary, modifier = Modifier.size(16.dp))
                                 Spacer(Modifier.width(4.dp))
-                                Text(place.first,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = if (selectedPopular == place)
-                                        TiticacaDeepBlue
-                                    else TextMuted)
+                                Text(place.first, style = MaterialTheme.typography.bodyMedium, color = if (selectedPopular == place) TextPrimary else TextSecondary)
                             }
                         }
                     }
                 }
 
-                OutlinedTextField(
+                TextField(
                     value = costStr,
                     onValueChange = { costStr = it },
                     label = { Text("Costo Estimado (S/)") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TiticacaTurquoise,
-                        unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f)
+                    shape = RoundedCornerShape(14.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = InputBg,
+                        unfocusedContainerColor = InputBg,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = PrimaryOrange
                     )
                 )
-                OutlinedTextField(
+                TextField(
                     value = dayStr,
                     onValueChange = { dayStr = it },
-                    label = { Text("N�mero de D�a (1, 2, 3...)") },
+                    label = { Text("N?mero de D?a (1, 2, 3...)") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = TiticacaTurquoise,
-                        unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f)
+                    shape = RoundedCornerShape(14.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = InputBg,
+                        unfocusedContainerColor = InputBg,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = PrimaryOrange
                     )
                 )
             }
@@ -630,67 +574,92 @@ fun AddPlaceDialog(
                     val day = dayStr.toIntOrNull() ?: 1
                     if (selectedTab == 0 && selectedPlace != null) {
                         val place = selectedPlace!!
-                        onConfirm(place.name, place.name,
-                            place.latLng.latitude, place.latLng.longitude, cost, day)
+                        onConfirm(place.name, place.name, place.latLng.latitude, place.latLng.longitude, cost, day)
                     } else if (selectedTab == 1 && selectedPopular != null) {
                         val place = selectedPopular!!
                         onConfirm(place.first, place.first, place.second, place.third, cost, day)
                     }
                 },
                 enabled = canSave,
-                colors = ButtonDefaults.buttonColors(containerColor = TiticacaTurquoise)
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange)
             ) {
                 Text("Guardar en Itinerario")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar", color = TextMuted) }
+            TextButton(onClick = onDismiss) { Text("Cancelar", color = TextSecondary) }
         }
     )
 }
 
-// ?????????????????????????????????????????????
-// Tarjeta del itinerario (click abre vista previa)
-// ?????????????????????????????????????????????
 @Composable
 fun ItineraryCard(
     item: ItineraryItem,
     onItemClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+    val photoUrl = getPlaceReferencePhoto(item.locationName, item.title)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp), clip = false)
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp), clip = false)
             .clickable { onItemClick() },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = SurfaceSoft),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Badge(containerColor = TiticacaTurquoise) {
-                Text("D�a ${item.dayNumber}", modifier = Modifier.padding(6.dp), color = Color.White)
-            }
-            Spacer(Modifier.width(16.dp))
+            AsyncImage(
+                model = photoUrl,
+                contentDescription = item.title,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(Modifier.width(14.dp))
+
             Column(modifier = Modifier.weight(1f)) {
-                Text(item.title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = TiticacaDeepBlue)
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = PrimaryOrange
+                ) {
+                    Text(
+                        "D?a ${item.dayNumber}",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    item.title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = TextPrimary
+                )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null,
-                        modifier = Modifier.size(16.dp), tint = TextMuted)
+                    Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(14.dp), tint = TextSecondary)
                     Spacer(Modifier.width(4.dp))
-                    Text(item.locationName, style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                    Text(item.locationName, style = MaterialTheme.typography.bodySmall, color = TextSecondary)
                 }
             }
-            Text("S/ ${item.cost}",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                color = TiticacaBlue)
-            Spacer(Modifier.width(8.dp))
-            IconButton(onClick = onDeleteClick) {
-                Icon(Icons.Default.Delete, contentDescription = "Eliminar",
-                    tint = ErrorRed)
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    "S/ ${item.cost}",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = PrimaryOrange
+                )
+                IconButton(onClick = onDeleteClick, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = ErrorRed, modifier = Modifier.size(18.dp))
+                }
             }
         }
     }

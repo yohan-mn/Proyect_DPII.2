@@ -16,20 +16,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.proyect.travelhub.data.model.ChatMessage
+import androidx.compose.foundation.shape.CircleShape
 
 // ---------------------------------------------------------------------------
-// Misma paleta usada en Login/RegisterScreen/CatalogScreen (inspirada en el
-// Lago Titicaca) para mantener consistencia visual entre pantallas.
-// No afecta la l�gica.
+// Paleta inspirada en las referencias (salón/barbería Casca)
 // ---------------------------------------------------------------------------
-private val TiticacaDeepBlue = Color(0xFF0D3B66)
-private val TiticacaBlue = Color(0xFF1976D2)
-private val TiticacaTurquoise = Color(0xFF14B8A6)
-private val TiticacaSky = Color(0xFFEAF4FB)
-private val TiticacaGold = Color(0xFFF2A93B)
-private val SurfaceSoft = Color(0xFFFFFFFF)
-private val TextMuted = Color(0xFF5B6B79)
-private val BubbleReceived = Color(0xFFEAF4FB)
+private val PrimaryOrange      = Color(0xFFF5A623)
+private val PrimaryOrangeLight = Color(0xFFFFF3E0)
+private val Background         = Color(0xFFE3F2FD)
+private val SurfaceSoft        = Color(0xFFFFFFFF)
+private val InputBg            = Color(0xFFF5F5F5)
+private val TextPrimary        = Color(0xFF1F1F1F)
+private val TextSecondary      = Color(0xFF9E9E9E)
+private val BubbleMe           = PrimaryOrange
+private val BubbleOther        = Color(0xFFF0F0F0)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,48 +48,49 @@ fun ChatScreen(
     }
 
     Scaffold(
-        containerColor = TiticacaSky,
+        containerColor = Background,
         topBar = {
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Surface(
-                            shape = androidx.compose.foundation.shape.CircleShape,
-                            color = TiticacaTurquoise,
-                            modifier = Modifier.size(36.dp)
+                            shape = CircleShape,
+                            color = PrimaryOrange,
+                            modifier = Modifier.size(40.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
                                     text = otherUserName.take(1).uppercase(),
                                     color = Color.White,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleMedium
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
                                 otherUserName,
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = Color.White
+                                color = TextPrimary
                             )
                             Text(
-                                "En l�nea",
+                                "En l?nea",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = TiticacaGold
+                                color = PrimaryOrange
                             )
                         }
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TiticacaDeepBlue,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = SurfaceSoft,
+                    titleContentColor = TextPrimary,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         }
@@ -104,8 +105,7 @@ fun ChatScreen(
                     .weight(1f)
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                reverseLayout = false
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(messages) { msg ->
                     ChatBubble(msg = msg, isMe = msg.senderId == viewModel.currentUserId)
@@ -114,30 +114,32 @@ fun ChatScreen(
 
             Surface(
                 color = SurfaceSoft,
-                shadowElevation = 4.dp,
+                shadowElevation = 8.dp,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedTextField(
+                    TextField(
                         value = textInput,
                         onValueChange = { textInput = it },
-                        placeholder = { Text("Escribe un mensaje...", color = TextMuted) },
+                        placeholder = { Text("Escribe un mensaje...", color = TextSecondary) },
                         shape = RoundedCornerShape(24.dp),
                         modifier = Modifier.weight(1f),
                         maxLines = 3,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = TiticacaTurquoise,
-                            unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
-                            cursorColor = TiticacaDeepBlue
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = InputBg,
+                            unfocusedContainerColor = InputBg,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = PrimaryOrange
                         )
                     )
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
 
                     FloatingActionButton(
                         onClick = {
@@ -146,10 +148,12 @@ fun ChatScreen(
                                 textInput = ""
                             }
                         },
-                        containerColor = TiticacaTurquoise,
-                        modifier = Modifier.size(48.dp)
+                        containerColor = PrimaryOrange,
+                        contentColor = Color.White,
+                        modifier = Modifier.size(48.dp),
+                        shape = CircleShape
                     ) {
-                        Icon(Icons.Default.Send, contentDescription = "Enviar", tint = Color.White)
+                        Icon(Icons.Default.Send, contentDescription = "Enviar")
                     }
                 }
             }
@@ -165,28 +169,28 @@ fun ChatBubble(msg: ChatMessage, isMe: Boolean) {
     ) {
         Surface(
             shape = RoundedCornerShape(
-                topStart = 16.dp,
-                topEnd = 16.dp,
-                bottomStart = if (isMe) 16.dp else 4.dp,
-                bottomEnd = if (isMe) 4.dp else 16.dp
+                topStart = 18.dp,
+                topEnd = 18.dp,
+                bottomStart = if (isMe) 18.dp else 4.dp,
+                bottomEnd = if (isMe) 4.dp else 18.dp
             ),
-            color = if (isMe) TiticacaBlue else BubbleReceived,
-            shadowElevation = 2.dp,
+            color = if (isMe) BubbleMe else BubbleOther,
+            shadowElevation = 1.dp,
             modifier = Modifier.widthIn(max = 280.dp)
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
                 if (!isMe && msg.senderName.isNotBlank()) {
                     Text(
                         text = msg.senderName,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = TiticacaDeepBlue
+                        color = PrimaryOrange
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                 }
                 Text(
                     text = msg.messageText,
-                    color = if (isMe) Color.White else TiticacaDeepBlue,
+                    color = if (isMe) Color.White else TextPrimary,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

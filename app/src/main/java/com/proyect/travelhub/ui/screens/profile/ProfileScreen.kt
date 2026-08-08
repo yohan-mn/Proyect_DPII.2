@@ -1,6 +1,7 @@
 package com.proyect.travelhub.ui.screens.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,8 +12,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,18 +22,17 @@ import coil.compose.AsyncImage
 import com.proyect.travelhub.data.model.UserRole
 
 // ---------------------------------------------------------------------------
-// Misma paleta usada en Login/RegisterScreen/CatalogScreen/Chat/Itinerario
-// (inspirada en el Lago Titicaca) para mantener consistencia visual entre
-// pantallas. No afecta la l�gica.
+// Paleta inspirada en las referencias (salon/barberia Casca)
 // ---------------------------------------------------------------------------
-private val TiticacaDeepBlue = Color(0xFF0D3B66)
-private val TiticacaBlue = Color(0xFF1976D2)
-private val TiticacaTurquoise = Color(0xFF14B8A6)
-private val TiticacaSky = Color(0xFFEAF4FB)
-private val TiticacaGold = Color(0xFFF2A93B)
-private val SurfaceSoft = Color(0xFFFFFFFF)
-private val TextMuted = Color(0xFF5B6B79)
-private val ErrorRed = Color(0xFFD64545)
+private val PrimaryOrange      = Color(0xFFF5A623)
+private val PrimaryOrangeLight = Color(0xFFFFF3E0)
+private val Background         = Color(0xFFE3F2FD)
+private val SurfaceSoft        = Color(0xFFF8FDFF)
+private val InputBg            = Color(0xFFF5F5F5)
+private val TextPrimary        = Color(0xFF1F1F1F)
+private val TextSecondary      = Color(0xFF9E9E9E)
+private val ErrorRed           = Color(0xFFE53935)
+private val PrimaryOrangeDark  = Color(0xFFE8941F)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,19 +57,19 @@ fun ProfileScreen(
     }
 
     Scaffold(
-        containerColor = TiticacaSky,
+        containerColor = Background,
         topBar = {
             TopAppBar(
                 title = { Text("Mi Perfil de Usuario", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TiticacaDeepBlue,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = SurfaceSoft,
+                    titleContentColor = TextPrimary,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         },
@@ -77,7 +77,7 @@ fun ProfileScreen(
     ) { padding ->
         if (isLoading) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = TiticacaTurquoise)
+                CircularProgressIndicator(color = PrimaryOrange)
             }
         } else if (user != null) {
             val u = user!!
@@ -85,15 +85,17 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(20.dp),
+                    .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Header Avatar
+                Spacer(Modifier.height(24.dp))
+
+                // Avatar grande centrado (estilo referencia de perfil)
                 Box(
                     modifier = Modifier
-                        .size(110.dp)
+                        .size(100.dp)
                         .clip(CircleShape)
-                        .background(TiticacaTurquoise.copy(alpha = 0.15f)),
+                        .background(PrimaryOrangeLight),
                     contentAlignment = Alignment.Center
                 ) {
                     if (u.avatarUrl.isNotBlank()) {
@@ -107,96 +109,89 @@ fun ProfileScreen(
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = TiticacaTurquoise
+                            modifier = Modifier.size(56.dp),
+                            tint = PrimaryOrange
                         )
                     }
                 }
 
                 Spacer(Modifier.height(16.dp))
 
-                Text(u.name, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), color = TiticacaDeepBlue)
+                Text(
+                    u.name,
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    color = TextPrimary
+                )
                 Spacer(Modifier.height(4.dp))
+                Text(
+                    u.email,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    if (u.phone.isNotBlank()) u.phone else "No especificado",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary
+                )
+                Spacer(Modifier.height(8.dp))
 
                 // Rol Badge
-                Badge(
-                    containerColor = if (u.role == UserRole.PRESTADOR)
-                        TiticacaGold
-                    else TiticacaBlue
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = if (u.role == UserRole.PRESTADOR) PrimaryOrange else PrimaryOrangeLight
                 ) {
                     Text(
                         text = if (u.role == UserRole.PRESTADOR) "PRESTADOR DE SERVICIOS" else "TURISTA EXPLORADOR",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                        color = if (u.role == UserRole.PRESTADOR) Color.White else PrimaryOrangeDark,
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.labelSmall
                     )
                 }
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(32.dp))
 
-                // Datos de la cuenta en Card
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp), clip = false),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = SurfaceSoft),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(22.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 6.dp
+                    )
                 ) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Email, contentDescription = null, tint = TiticacaBlue)
-                            Spacer(Modifier.width(12.dp))
-                            Column {
-                                Text("Correo Electr�nico", style = MaterialTheme.typography.labelSmall, color = TextMuted)
-                                Text(u.email, style = MaterialTheme.typography.bodyLarge, color = TiticacaDeepBlue)
-                            }
-                        }
 
-                        HorizontalDivider(color = TiticacaBlue.copy(alpha = 0.15f))
+                    Column(
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp)
+                    ) {
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Phone, contentDescription = null, tint = TiticacaBlue)
-                            Spacer(Modifier.width(12.dp))
-                            Column {
-                                Text("Tel�fono de Contacto", style = MaterialTheme.typography.labelSmall, color = TextMuted)
-                                Text(if (u.phone.isNotBlank()) u.phone else "No especificado", style = MaterialTheme.typography.bodyLarge, color = TiticacaDeepBlue)
+                        ProfileMenuItem(
+                            icon = Icons.Default.Person,
+                            title = "Editar Perfil",
+                            onClick = { showEditDialog = true }
+                        )
+
+                        HorizontalDivider(
+                            color = Color(0xFFEAEAEA),
+                            thickness = 1.dp
+                        )
+
+                        ProfileMenuItem(
+                            icon = Icons.Default.Logout,
+                            title = "Cerrar Sesión",
+                            tint = ErrorRed,
+                            onClick = {
+                                viewModel.logout {
+                                    onNavigateToLogin()
+                                }
                             }
-                        }
+                        )
                     }
                 }
 
                 Spacer(Modifier.height(24.dp))
-
-                // Botones de acci�n
-                OutlinedButton(
-                    onClick = { showEditDialog = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, TiticacaBlue.copy(alpha = 0.35f)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = TiticacaDeepBlue)
-                ) {
-                    Icon(Icons.Default.Edit, contentDescription = null, tint = TiticacaTurquoise)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Editar Datos del Perfil", fontWeight = FontWeight.SemiBold)
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                Button(
-                    onClick = {
-                        viewModel.logout {
-                            onNavigateToLogin()
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ErrorRed)
-                ) {
-                    Icon(Icons.Default.Logout, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Cerrar Sesi�n", fontWeight = FontWeight.SemiBold)
-                }
             }
         }
     }
@@ -209,71 +204,54 @@ fun ProfileScreen(
         AlertDialog(
             onDismissRequest = { showEditDialog = false },
             containerColor = SurfaceSoft,
-            title = { Text("Editar Perfil", color = TiticacaDeepBlue, fontWeight = FontWeight.Bold) },
+            shape = RoundedCornerShape(24.dp),
+            title = { Text("Editar Perfil", color = TextPrimary, fontWeight = FontWeight.Bold) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    TextField(
                         value = name,
                         onValueChange = { name = it },
                         label = { Text("Nombre Completo") },
-                        colors = OutlinedTextFieldDefaults.colors(
-
-                            focusedBorderColor = TiticacaTurquoise,
-                            unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
-
-                            focusedLabelColor = TiticacaTurquoise,
-                            unfocusedLabelColor = TextMuted,
-
-                            focusedTextColor = TiticacaDeepBlue,
-                            unfocusedTextColor = TiticacaDeepBlue,
-
-                            focusedPlaceholderColor = TextMuted,
-                            unfocusedPlaceholderColor = TextMuted,
-
-                            cursorColor = TiticacaTurquoise
-                        )
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = InputBg,
+                            unfocusedContainerColor = InputBg,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryOrange
+                        ),
+                        shape = RoundedCornerShape(16.dp)
                     )
-                    OutlinedTextField(
+                    TextField(
                         value = phone,
                         onValueChange = { phone = it },
                         label = { Text("Telefono") },
-                        colors = OutlinedTextFieldDefaults.colors(
-
-                            focusedBorderColor = TiticacaTurquoise,
-                            unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
-
-                            focusedLabelColor = TiticacaTurquoise,
-                            unfocusedLabelColor = TextMuted,
-
-                            focusedTextColor = TiticacaDeepBlue,
-                            unfocusedTextColor = TiticacaDeepBlue,
-
-                            focusedPlaceholderColor = TextMuted,
-                            unfocusedPlaceholderColor = TextMuted,
-
-                            cursorColor = TiticacaTurquoise
-                        )
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = InputBg,
+                            unfocusedContainerColor = InputBg,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryOrange
+                        ),
+                        shape = RoundedCornerShape(16.dp)
                     )
-                    OutlinedTextField(
+                    TextField(
                         value = avatarUrl,
                         onValueChange = { avatarUrl = it },
                         label = { Text("URL Foto de Perfil (Opcional)") },
-                        colors = OutlinedTextFieldDefaults.colors(
-
-                            focusedBorderColor = TiticacaTurquoise,
-                            unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
-
-                            focusedLabelColor = TiticacaTurquoise,
-                            unfocusedLabelColor = TextMuted,
-
-                            focusedTextColor = TiticacaDeepBlue,
-                            unfocusedTextColor = TiticacaDeepBlue,
-
-                            focusedPlaceholderColor = TextMuted,
-                            unfocusedPlaceholderColor = TextMuted,
-
-                            cursorColor = TiticacaTurquoise
-                        )
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = InputBg,
+                            unfocusedContainerColor = InputBg,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary,
+                            cursorColor = PrimaryOrange
+                        ),
+                        shape = RoundedCornerShape(16.dp)
                     )
                 }
             },
@@ -283,14 +261,51 @@ fun ProfileScreen(
                         viewModel.updateProfile(name, phone, avatarUrl)
                         showEditDialog = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = TiticacaTurquoise)
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange)
                 ) {
                     Text("Guardar")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEditDialog = false }) { Text("Cancelar", color = TextMuted) }
+                TextButton(onClick = { showEditDialog = false }) { Text("Cancelar", color = TextSecondary) }
             }
+        )
+    }
+}
+
+@Composable
+private fun ProfileMenuItem(
+    icon: ImageVector,
+    title: String,
+    tint: Color = TextPrimary,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = title,
+            tint = if (tint == ErrorRed) ErrorRed else PrimaryOrange,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(Modifier.width(16.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+            color = tint,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = TextSecondary,
+            modifier = Modifier.size(20.dp)
         )
     }
 }

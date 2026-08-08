@@ -3,6 +3,7 @@ package com.proyect.travelhub.ui.screens.servicedetail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -24,16 +25,16 @@ import coil.compose.AsyncImage
 import com.proyect.travelhub.data.repository.ReservationRepository
 
 // ---------------------------------------------------------------------------
-// Paleta Lago Titicaca (coherente con LoginScreen)
+// Paleta inspirada en las referencias (salón/barbería Casca)
 // ---------------------------------------------------------------------------
-private val TiticacaDeepBlue = Color(0xFF0D3B66)
-private val TiticacaBlue   = Color(0xFF1976D2)
-private val TiticacaTurquoise = Color(0xFF14B8A6)
-private val TiticacaSky    = Color(0xFFE3F2FD)
-private val TiticacaGold   = Color(0xFFF2A93B)
-private val TiticacaGoldDark = Color(0xFFD98324)
-private val SurfaceSoft    = Color(0xFFFFFFFF)
-private val TextMuted      = Color(0xFF5B6B79)
+private val PrimaryOrange      = Color(0xFFF5A623)
+private val PrimaryOrangeLight = Color(0xFFFFF3E0)
+private val PrimaryOrangeDark  = Color(0xFFE8941F)
+private val Background         = Color(0xFFE3F2FD)
+private val SurfaceSoft        = Color(0xFFFFFFFF)
+private val InputBg            = Color(0xFFF5F5F5)
+private val TextPrimary        = Color(0xFF1F1F1F)
+private val TextSecondary      = Color(0xFF9E9E9E)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,56 +60,31 @@ fun ServiceDetailScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(TiticacaSky),
+                .background(Background),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(color = TiticacaTurquoise, strokeWidth = 4.dp)
+            CircularProgressIndicator(color = PrimaryOrange, strokeWidth = 4.dp)
         }
         return
     }
 
     val scrollState = rememberScrollState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Detalle del Servicio",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TiticacaDeepBlue
-                )
-            )
-        }
-    ) { padding ->
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(TiticacaSky)
-                .padding(padding)
+                .background(Background)
                 .verticalScroll(scrollState)
         ) {
-            // Imagen hero del servicio
+            // Imagen hero con back button flotante
             val heroImage = service?.imageUrls?.firstOrNull()?.takeIf { it.isNotBlank() }
                 ?: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(220.dp)
+                    .height(240.dp)
             ) {
                 AsyncImage(
                     model = heroImage,
@@ -116,20 +92,37 @@ fun ServiceDetailScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
-                // Gradiente inferior para legibilidad
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
                                 colors = listOf(
+                                    Color.Black.copy(alpha = 0.3f),
                                     Color.Transparent,
-                                    TiticacaDeepBlue.copy(alpha = 0.7f)
+                                    Color.Black.copy(alpha = 0.5f)
                                 )
                             )
                         )
                 )
-                // Título sobre la imagen
+
+                // Back button flotante estilo referencia
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .size(40.dp)
+                        .background(Color.White.copy(alpha = 0.9f), CircleShape)
+                ) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "Volver",
+                        tint = TextPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // Título sobre la imagen (abajo)
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
@@ -147,7 +140,7 @@ fun ServiceDetailScreen(
                         Icon(
                             Icons.Default.Place,
                             contentDescription = null,
-                            tint = TiticacaGold,
+                            tint = PrimaryOrange,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -160,23 +153,23 @@ fun ServiceDetailScreen(
                 }
             }
 
-            // Contenido principal en card blanca
+            // Card blanca que sube (estilo referencia)
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .offset(y = (-20).dp)
+                    .offset(y = (-24).dp)
                     .padding(horizontal = 16.dp)
-                    .shadow(8.dp, RoundedCornerShape(24.dp), clip = false),
-                shape = RoundedCornerShape(24.dp),
+                    .shadow(10.dp, RoundedCornerShape(28.dp), clip = false),
+                shape = RoundedCornerShape(28.dp),
                 colors = CardDefaults.cardColors(containerColor = SurfaceSoft),
                 elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(22.dp)
+                        .padding(24.dp)
                 ) {
-                    // Fila de rating y categoría
+                    // Rating y categoría
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -184,7 +177,7 @@ fun ServiceDetailScreen(
                     ) {
                         Surface(
                             shape = RoundedCornerShape(10.dp),
-                            color = TiticacaSky
+                            color = PrimaryOrangeLight
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -193,7 +186,7 @@ fun ServiceDetailScreen(
                                 Icon(
                                     Icons.Default.Star,
                                     contentDescription = null,
-                                    tint = TiticacaGold,
+                                    tint = PrimaryOrange,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
@@ -201,7 +194,7 @@ fun ServiceDetailScreen(
                                     text = service?.rating?.toString() ?: "--",
                                     style = MaterialTheme.typography.labelLarge.copy(
                                         fontWeight = FontWeight.Bold,
-                                        color = TiticacaDeepBlue
+                                        color = PrimaryOrangeDark
                                     )
                                 )
                             }
@@ -209,13 +202,13 @@ fun ServiceDetailScreen(
 
                         Surface(
                             shape = RoundedCornerShape(10.dp),
-                            color = TiticacaTurquoise.copy(alpha = 0.12f)
+                            color = PrimaryOrangeLight
                         ) {
                             Text(
                                 text = service?.category?.name ?: "Servicio",
                                 style = MaterialTheme.typography.labelLarge.copy(
                                     fontWeight = FontWeight.SemiBold,
-                                    color = TiticacaTurquoise
+                                    color = PrimaryOrangeDark
                                 ),
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
@@ -224,10 +217,10 @@ fun ServiceDetailScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Precio destacado
+                    // Precio destacado en barra naranja
                     Surface(
                         shape = RoundedCornerShape(16.dp),
-                        color = TiticacaDeepBlue,
+                        color = PrimaryOrange,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
@@ -239,23 +232,23 @@ fun ServiceDetailScreen(
                         ) {
                             Column {
                                 Text(
-                                    text = "Precio por día / unidad",
+                                    text = "Precio por d?a / unidad",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(alpha = 0.7f)
+                                    color = Color.White.copy(alpha = 0.8f)
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "S/ ${service?.pricePerDayOrUnit ?: "--"}",
                                     style = MaterialTheme.typography.headlineMedium.copy(
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = TiticacaGold
+                                        color = Color.White
                                     )
                                 )
                             }
                             Icon(
                                 imageVector = Icons.Default.AttachMoney,
                                 contentDescription = null,
-                                tint = TiticacaGold.copy(alpha = 0.5f),
+                                tint = Color.White.copy(alpha = 0.4f),
                                 modifier = Modifier.size(40.dp)
                             )
                         }
@@ -263,32 +256,32 @@ fun ServiceDetailScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Descripción
+                    // Descripci?n
                     Text(
-                        text = "Descripción",
+                        text = "Descripci?n",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            color = TiticacaDeepBlue
+                            color = TextPrimary
                         )
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = service?.description ?: "Sin descripción disponible.",
+                        text = service?.description ?: "Sin descripci?n disponible.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = TextMuted,
+                        color = TextSecondary,
                         lineHeight = 22.sp
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    HorizontalDivider(color = TiticacaBlue.copy(alpha = 0.15f))
+                    HorizontalDivider(color = TextSecondary.copy(alpha = 0.15f))
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // ID del servicio (info técnica sutil)
+                    // ID del servicio
                     Surface(
                         shape = RoundedCornerShape(10.dp),
-                        color = TiticacaSky
+                        color = InputBg
                     ) {
                         Row(
                             modifier = Modifier
@@ -299,21 +292,21 @@ fun ServiceDetailScreen(
                             Icon(
                                 Icons.Default.Numbers,
                                 contentDescription = null,
-                                tint = TextMuted,
+                                tint = TextSecondary,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "ID: $serviceId",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = TextMuted
+                                color = TextSecondary
                             )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Botón Chatear (lógica original preservada)
+                    // Botón Chatear (l?gica original preservada)
                     Button(
                         onClick = {
                             val currentService = service ?: return@Button
@@ -330,11 +323,11 @@ fun ServiceDetailScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(54.dp)
+                            .height(56.dp)
                             .shadow(6.dp, RoundedCornerShape(16.dp), clip = false),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = TiticacaTurquoise,
+                            containerColor = PrimaryOrange,
                             contentColor = Color.White
                         )
                     ) {
@@ -349,7 +342,7 @@ fun ServiceDetailScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Botón Reservar (lógica original preservada)
+                    // Botón Reservar (l?gica original preservada)
                     OutlinedButton(
                         onClick = {
                             service?.let {
@@ -358,14 +351,14 @@ fun ServiceDetailScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(54.dp),
+                            .height(56.dp),
                         shape = RoundedCornerShape(16.dp),
                         border = androidx.compose.foundation.BorderStroke(
                             1.5.dp,
-                            TiticacaBlue.copy(alpha = 0.4f)
+                            TextSecondary.copy(alpha = 0.3f)
                         ),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = TiticacaDeepBlue
+                            contentColor = TextPrimary
                         )
                     ) {
                         Icon(Icons.Default.CalendarMonth, contentDescription = null)
@@ -377,11 +370,11 @@ fun ServiceDetailScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }

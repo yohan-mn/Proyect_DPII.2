@@ -13,7 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -23,17 +23,14 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 // ---------------------------------------------------------------------------
-// Misma paleta usada en Login/RegisterScreen/CatalogScreen (inspirada en el
-// Lago Titicaca) para mantener consistencia visual entre pantallas.
-// No afecta la l�gica.
+// Paleta inspirada en las referencias (salón/barbería Casca)
 // ---------------------------------------------------------------------------
-private val TiticacaDeepBlue = Color(0xFF0D3B66)
-private val TiticacaBlue = Color(0xFF1976D2)
-private val TiticacaTurquoise = Color(0xFF14B8A6)
-private val TiticacaSky = Color(0xFFEAF4FB)
-private val TiticacaGold = Color(0xFFF2A93B)
-private val SurfaceSoft = Color(0xFFFFFFFF)
-private val TextMuted = Color(0xFF5B6B79)
+private val PrimaryOrange      = Color(0xFFF5A623)
+private val PrimaryOrangeLight = Color(0xFFFFF3E0)
+private val Background         = Color(0xFFE3F2FD)
+private val SurfaceSoft        = Color(0xFFFFFFFF)
+private val TextPrimary        = Color(0xFF1F1F1F)
+private val TextSecondary      = Color(0xFF9E9E9E)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,19 +46,19 @@ fun ChatListScreen(
     }
 
     Scaffold(
-        containerColor = TiticacaSky,
+        containerColor = Background,
         topBar = {
             TopAppBar(
                 title = { Text("Mis Mensajes / Chat", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = TextPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = TiticacaDeepBlue,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = SurfaceSoft,
+                    titleContentColor = TextPrimary,
+                    navigationIconContentColor = TextPrimary
                 )
             )
         }
@@ -78,19 +75,19 @@ fun ChatListScreen(
                         imageVector = Icons.Default.ChatBubble,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
-                        tint = TiticacaTurquoise.copy(alpha = 0.5f)
+                        tint = PrimaryOrange.copy(alpha = 0.5f)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "A�n no tienes conversaciones activas.",
+                        text = "A?n no tienes conversaciones activas.",
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = TiticacaDeepBlue
+                        color = TextPrimary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Contacta a un prestador desde el cat�logo para chatear.",
+                        text = "Contacta a un prestador desde el cat?logo para chatear.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = TextMuted
+                        color = TextSecondary
                     )
                 }
             }
@@ -99,8 +96,8 @@ fun ChatListScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
-                contentPadding = PaddingValues(vertical = 8.dp, horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                contentPadding = PaddingValues(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
                 items(conversations) { item ->
                     ConversationItemRow(
@@ -108,6 +105,11 @@ fun ChatListScreen(
                         onClick = {
                             onConversationClick(item.chatId, item.otherUserId, item.otherUserName)
                         }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 88.dp, end = 16.dp),
+                        color = TextSecondary.copy(alpha = 0.1f),
+                        thickness = 0.5.dp
                     )
                 }
             }
@@ -120,67 +122,54 @@ fun ConversationItemRow(
     item: ChatConversation,
     onClick: () -> Unit
 ) {
-    Surface(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(elevation = 3.dp, shape = RoundedCornerShape(16.dp), clip = false)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        color = SurfaceSoft
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+        // Avatar circular naranja (estilo referencia)
+        Surface(
+            shape = CircleShape,
+            color = PrimaryOrange,
+            modifier = Modifier.size(56.dp)
         ) {
-            Surface(
-                shape = CircleShape,
-                color = TiticacaTurquoise,
-                modifier = Modifier.size(48.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = item.otherUserName.take(1).uppercase().ifBlank { "U" },
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = item.otherUserName.ifBlank { "Usuario TravelHub" },
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = TiticacaDeepBlue
-                    )
-                    if (item.lastTimestamp > 0) {
-                        val date = Date(item.lastTimestamp)
-                        val format = SimpleDateFormat("HH:mm", Locale.getDefault())
-                        Text(
-                            text = format.format(date),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = TiticacaGold
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
+            Box(contentAlignment = Alignment.Center) {
                 Text(
-                    text = item.lastMessage.ifBlank { "Sin mensajes a�n" },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextMuted,
-                    maxLines = 1
+                    text = item.otherUserName.take(1).uppercase().ifBlank { "U" },
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = item.otherUserName.ifBlank { "Usuario TravelHub" },
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = item.lastMessage.ifBlank { "Sin mensajes a?n" },
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextSecondary,
+                maxLines = 1
+            )
+        }
+
+        if (item.lastTimestamp > 0) {
+            val date = Date(item.lastTimestamp)
+            val format = SimpleDateFormat("HH:mm", Locale.getDefault())
+            Text(
+                text = format.format(date),
+                style = MaterialTheme.typography.labelSmall,
+                color = TextSecondary
+            )
         }
     }
 }

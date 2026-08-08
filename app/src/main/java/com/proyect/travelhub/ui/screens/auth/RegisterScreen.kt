@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -24,15 +23,16 @@ import com.proyect.travelhub.data.model.User
 import com.proyect.travelhub.data.model.UserRole
 
 // ---------------------------------------------------------------------------
-// Misma paleta usada en LoginScreen (inspirada en el Lago Titicaca) para
-// mantener consistencia visual entre pantallas. No afecta ninguna lógica.
+// Paleta adaptada desde las referencias visuales (salón/barbería Casca)
 // ---------------------------------------------------------------------------
-private val TiticacaDeepBlue = Color(0xFF0D3B66)
-private val TiticacaBlue = Color(0xFF1976D2)
-private val TiticacaTurquoise = Color(0xFF14B8A6)
-private val TiticacaSky = Color(0xFFE3F2FD)
-private val SurfaceSoft = Color(0xFFFFFFFF)
-private val TextMuted = Color(0xFF5B6B79)
+private val PrimaryOrange      = Color(0xFFF5A623)
+private val PrimaryOrangeDark  = Color(0xFFE8941F)
+private val PrimaryOrangeLight = Color(0xFFFFF3E0)
+private val Background         = Color(0xFFE3F2FD)
+private val SurfaceSoft        = Color(0xFFFFFFFF)
+private val InputBg            = Color(0xFFF5F5F5)
+private val TextPrimary        = Color(0xFF1F1F1F)
+private val TextSecondary      = Color(0xFF9E9E9E)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,50 +56,43 @@ fun RegisterScreen(
         }
     }
 
-    val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = TiticacaTurquoise,
-        unfocusedBorderColor = TiticacaBlue.copy(alpha = 0.25f),
-        focusedLabelColor = TiticacaTurquoise,
-        unfocusedLabelColor = TextMuted,
-        focusedLeadingIconColor = TiticacaTurquoise,
-        unfocusedLeadingIconColor = TextMuted,
-        focusedTrailingIconColor = TiticacaTurquoise,
-        unfocusedTrailingIconColor = TextMuted,
-        focusedTextColor = TiticacaDeepBlue,
-        unfocusedTextColor = TiticacaDeepBlue,
-
-        focusedPlaceholderColor = TextMuted,
-        unfocusedPlaceholderColor = TextMuted,
-
-        cursorColor = TiticacaTurquoise
+    // Colores de campo estilo referencia
+    val fieldColors = TextFieldDefaults.colors(
+        focusedTextColor = TextPrimary,
+        unfocusedTextColor = TextPrimary,
+        focusedContainerColor = InputBg,
+        unfocusedContainerColor = InputBg,
+        disabledContainerColor = InputBg,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent,
+        errorIndicatorColor = Color.Transparent,
+        focusedLeadingIconColor = PrimaryOrange,
+        unfocusedLeadingIconColor = TextSecondary,
+        focusedTrailingIconColor = PrimaryOrange,
+        unfocusedTrailingIconColor = TextSecondary,
+        cursorColor = PrimaryOrange
     )
 
     val chipColors = FilterChipDefaults.filterChipColors(
-        selectedContainerColor = TiticacaTurquoise.copy(alpha = 0.15f),
-        selectedLabelColor = TiticacaDeepBlue,
-        labelColor = TextMuted
+        containerColor = InputBg,
+        selectedContainerColor = PrimaryOrangeLight,
+        selectedLabelColor = PrimaryOrangeDark,
+        labelColor = TextSecondary
     )
 
     val chipBorder = FilterChipDefaults.filterChipBorder(
         enabled = true,
         selected = false,
-        borderColor = TiticacaBlue.copy(alpha = 0.25f),
-        selectedBorderColor = TiticacaTurquoise,
+        borderColor = Color.Transparent,
+        selectedBorderColor = PrimaryOrange,
         selectedBorderWidth = 1.5.dp
     )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        TiticacaDeepBlue,
-                        TiticacaBlue,
-                        TiticacaSky
-                    )
-                )
-            )
+            .background(Background)
     ) {
         Column(
             modifier = Modifier
@@ -117,12 +110,7 @@ fun RegisterScreen(
                 modifier = Modifier
                     .size(76.dp)
                     .shadow(elevation = 14.dp, shape = RoundedCornerShape(22.dp), clip = false)
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(TiticacaTurquoise, TiticacaBlue)
-                        ),
-                        shape = RoundedCornerShape(22.dp)
-                    )
+                    .background(PrimaryOrange, shape = RoundedCornerShape(22.dp))
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
@@ -142,7 +130,7 @@ fun RegisterScreen(
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 0.3.sp
                 ),
-                color = Color.White
+                color = TextPrimary
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -150,7 +138,7 @@ fun RegisterScreen(
             Text(
                 text = "Crea tu cuenta como Turista o Prestador de Servicios",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.85f)
+                color = TextSecondary
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -169,7 +157,7 @@ fun RegisterScreen(
                         .padding(horizontal = 22.dp, vertical = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    OutlinedTextField(
+                    TextField(
                         value = name,
                         onValueChange = { name = it },
                         label = { Text("Nombre Completo") },
@@ -182,7 +170,7 @@ fun RegisterScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    OutlinedTextField(
+                    TextField(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Correo Electrónico") },
@@ -195,7 +183,7 @@ fun RegisterScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    OutlinedTextField(
+                    TextField(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("Contraseña (mínimo 6 caracteres)") },
@@ -204,7 +192,8 @@ fun RegisterScreen(
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
                                     imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = null
+                                    contentDescription = null,
+                                    tint = TextSecondary
                                 )
                             }
                         },
@@ -217,7 +206,7 @@ fun RegisterScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    OutlinedTextField(
+                    TextField(
                         value = phone,
                         onValueChange = { phone = it },
                         label = { Text("Teléfono de Contacto") },
@@ -230,11 +219,11 @@ fun RegisterScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Selección de Rol
+                    // Selección de Rol (MISMA LÓGICA, ESTILO ADAPTADO)
                     Text(
                         text = "Tipo de Cuenta (Rol):",
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        color = TiticacaDeepBlue,
+                        color = TextPrimary,
                         modifier = Modifier.align(Alignment.Start)
                     )
 
@@ -257,7 +246,7 @@ fun RegisterScreen(
                         FilterChip(
                             selected = selectedRole == UserRole.PRESTADOR,
                             onClick = { selectedRole = UserRole.PRESTADOR },
-                            label = { Text("🛎️ Prestador", fontWeight = FontWeight.SemiBold) },
+                            label = { Text("🏪 Prestador", fontWeight = FontWeight.SemiBold) },
                             shape = RoundedCornerShape(14.dp),
                             colors = chipColors,
                             border = chipBorder,
@@ -268,7 +257,7 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(22.dp))
 
                     if (authState is AuthState.Loading) {
-                        CircularProgressIndicator(color = TiticacaTurquoise)
+                        CircularProgressIndicator(color = PrimaryOrange)
                     } else {
                         Button(
                             onClick = { viewModel.register(email, password, name, selectedRole, phone) },
@@ -278,7 +267,7 @@ fun RegisterScreen(
                                 .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp), clip = false),
                             shape = RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = TiticacaBlue,
+                                containerColor = PrimaryOrange,
                                 contentColor = Color.White
                             )
                         ) {
@@ -310,7 +299,7 @@ fun RegisterScreen(
                 Text(
                     "¿Ya tienes una cuenta? Inicia sesión aquí",
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = TextSecondary
                 )
             }
 
